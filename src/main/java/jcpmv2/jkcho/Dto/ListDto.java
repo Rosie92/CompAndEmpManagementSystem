@@ -11,12 +11,12 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public class ListDto<T> {
-    private Long count;
+    private Long listCount;
     private List<T> list;
     private Long compid;
 
     public ListDto() {
-        this.count = 0L;
+        this.listCount = 0L;
         this.list = new ArrayList<>();
     }
 

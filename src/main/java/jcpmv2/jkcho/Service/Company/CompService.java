@@ -34,9 +34,9 @@ public class CompService {
     }
 
 
-    public ListDto<CompDto> findAll(/*SearchingDto searchingDto*/) {
+    public ListDto<CompDto> findAll() {
         List<CompInfo> CompList = icompJpaTryRepository.findAll(Sort.by(Sort.Direction.ASC, "cname","cboss")/*searchingDto*/);
-        /*Long count = icompJpaTryRepository.count(searchingDto);*/
+        /*Long listCount = icompJpaTryRepository.count();*/
         int count = 0;
         int q = 0;
         while(q < CompList.size()) {
@@ -64,6 +64,7 @@ public class CompService {
             List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
             return ListDto.<CompDto>builder()
                     .list(CompListData)
+                    /*.listCount(listCount)*/
                     .build();
         }
     }

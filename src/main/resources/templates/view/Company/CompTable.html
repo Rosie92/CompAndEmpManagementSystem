@@ -31,8 +31,8 @@
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination small layout="prev, pager, next" :total="pageData.count"
-                       :page-size="pageData.searchData.countPerPage" :current-page.sync="pageData.searchData.pageNo"
+        <el-pagination small layout="prev, pager, next" :total="pageData.pagingData.listCount"
+                       :page-size="pageData.pagingData.countPerPage" :current-page.sync="pageData.pagingData.pageNo"
                        @current-change="list">
         </el-pagination>
     </div>
@@ -253,11 +253,9 @@
             listData: [],
             empListData: [],
             count: 0,
-            searchData: {
-                fromData: '',
-                toDate: '',
+            pagingData: {
                 pageNo: 1,
-                countPerPage: 5,
+                countPerPage: 5
             },
             searchCompid: {
                 searchCompid: ''
@@ -297,19 +295,13 @@
         let localMethod = {
             // --------------------------------- COMP ---------------------------------
             list: function () {
-                this.pageData.trainData.fromDate = '';
-                this.pageData.trainData.toDate = '';
-                if (this.pageData.etc.dateRange != '') {
-                    this.pageData.searchData.fromDate = this.pageData.etc.dateRange[0];
-                    this.pageData.searchData.toDate = this.pageData.etc.dateRange[1];
-                }
                 if (this.pageData.listConditionSearchData.item == '') {
                     // 전체 리스트 조회
-                    axiosGet("/api/company/compController", { /*params: this.pageData.searchData */},
+                    axiosGet("/api/company/compController", { /*params: this.pageData.pagingData*/ },
                         function (response) {
                             vueApp.pageData.listData = [];
                             vueApp.pageData.listData = response.data.list;
-                            /*vueApp.pageData.count = response.data.count;*/ //페이징을 위한 코드
+                            /*vueApp.pageData.pagingData.listCount = response.data.listCount;*/
                             console.log("list실행완료")
                         },
                         function (error) {

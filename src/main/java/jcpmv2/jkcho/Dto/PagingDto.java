@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SearchDto {
+public class PagingDto {
     private Integer pageNo = 1;
     private Integer countPerPage = 5;
 }

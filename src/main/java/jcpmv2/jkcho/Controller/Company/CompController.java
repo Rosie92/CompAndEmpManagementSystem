@@ -17,7 +17,7 @@ public class CompController {
 
     /*--------------------------------------SELECT--------------------------------------*/
     @GetMapping()
-    public ResponseEntity<ListDto<CompDto>> findAll(/*SearchingDto searchingDto*/) {
+    public ResponseEntity<ListDto<CompDto>> findAll( /*SearchingDto searchingDto*/) {
         return ResponseEntity.ok(compService.findAll(/*searchingDto*/));
     }
 

@@ -10,7 +10,7 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
-public class SearchingDto extends SearchDto {
+public class SearchingDto extends PagingDto {
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private LocalDate fromDate;
 
