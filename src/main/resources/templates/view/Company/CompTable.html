@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/defaultLayout">
+<th:block layout:fragment="css"><style></style></th:block>
+<div layout:fragment="content">
+    <!-- ##########################################Comp######################################### -->
+    <!-- -------------------- 회사 테이블 -------------------- -->
+    <div class="table-contents-wrap">
+        <el-table :data="pageData.listData" style="width:100%">
+            <el-table-column label="회사명" class-name="data-table-cell "
+                             label-class-name="data-table-header " :min-width="310">
+                <template slot-scope="scope">
+                    <el-link @click="empList(scope.row.cid)" data-toggle="modal" data-target="#empTableOn">{{ scope.row.cname }}</el-link>
+                </template>
+            </el-table-column>
+            <el-table-column prop="cboss" label="대표자명" class-name="data-table-cell "
+                             label-class-name="data-table-header" :min-width="190">
+            </el-table-column>
+            <el-table-column prop="ccall" label="대표전화" class-name="data-table-cell "
+                             label-class-name="data-table-header" :min-width="210">
+            </el-table-column>
+            <el-table-column prop="cnumber" label="법인번호" class-name="data-table-cell"
+                             label-class-name="data-table-header" :min-width="190">
+            </el-table-column>
+            <el-table-column label="정보수정" class-name="data-table-cell "
+                             label-class-name="data-table-header " :min-width="190">
+                <template slot-scope="scope">
+                    <el-link @click="compUpdateStep1(scope.row.cid)" data-toggle="modal" data-target="#compUpdate">[수정]</el-link>
+                    <el-link @click="compUnrealDelete(scope.row.cid)" data-toggle="modal">[가삭제]</el-link>
+                    <el-link @click="compRealDelete(scope.row.cid)" data-toggle="modal">[실삭제]</el-link>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination small layout="prev, pager, next" :total="pageData.count"
+                       :page-size="pageData.searchData.countPerPage" :current-page.sync="pageData.searchData.pageNo"
+                       @current-change="list">
+        </el-pagination>
+    </div>
+    <div>
+        <el-form ref="form" :model="pageData.listConditionSearchData">
+            <el-form-item label="리스트 조건 검색">
+                <el-row type="flex">
+                    <el-select v-model="pageData.listConditionSearchData.condition" placeholder="조건을 선택하세요">
+                        <el-option v-for="item in pageData.listCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
+                    </el-select>
+                    <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;"></el-input>
+                    <el-button @click="list">검색</el-button>
+                </el-row>
+            </el-form-item>
+        </el-form>
+
+    </div>
+    <!-- -------------------- 회사 업데이트 -------------------- -->
+    <div class="modal fade" id="compUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+        <div class="modal-dialog modal_div" role="document">
+            <div class="modal-content">
+                <div class="modal-common">
+                    <div class="modal-header">
+                        <h3>회사 정보 업데이트</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-contents-wrap">
+                            <div>
+                                <el-form ref="form" :model="pageData.compUpdateData" style="margin-left: 20px;">
+                                    <el-form-item label="회사명" style="display: inline-block;">
+                                        <el-input v-model="pageData.compUpdateData.cname" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="대표자명" style="display: inline-block;">
+                                        <el-input v-model="pageData.compUpdateData.cboss" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="대표전화" style="display: inline-block;">
+                                        <el-input v-model="pageData.compUpdateData.ccall" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="법인번호" style="display: inline-block;">
+                                        <el-input v-model="pageData.compUpdateData.cnumber" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-button @click="compUpdateStep2" style="margin-left: 20px;">저장</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- --------------------------------------------------------------------------------------- -->
+
+    <!-- ###########################################Emp######################################### -->
+    <!-- -------------------- 직원 테이블 -------------------- -->
+    <div class="modal fade" id="empTableOn" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal_div" role="document">
+            <div class="modal-content">
+                <div class="modal-common">
+                    <div class="modal-header">
+                        <h3>직원 테이블</h3>
+                    </div>
+                    <div class="modal-body" id="empTableReload">
+                        <div class="table-contents-wrap">
+                            <el-table :data="pageData.empListData" style="width:100%">
+                                <el-table-column prop="cname" label="회사명" class-name="data-table-cell "
+                                                 label-class-name="data-table-header" :min-width="200">
+                                </el-table-column>
+                                <el-table-column prop="ename" label="이름" class-name="data-table-cell "
+                                                 label-class-name="data-table-header" :min-width="100">
+                                </el-table-column>
+                                <el-table-column prop="eemail" label="이메일" class-name="data-table-cell "
+                                                 label-class-name="data-table-header" :min-width="100">
+                                </el-table-column>
+                                <el-table-column prop="ephone" label="휴대폰" class-name="data-table-cell "
+                                                 label-class-name="data-table-header" :min-width="100">
+                                </el-table-column>
+                                <el-table-column prop="eposition" label="소속" class-name="data-table-cell"
+                                                 label-class-name="data-table-header" :min-width="100">
+                                </el-table-column>
+                                <el-table-column prop="eaffiliation" label="직급" class-name="data-table-cell"
+                                                 label-class-name="data-table-header" :min-width="100">
+                                </el-table-column>
+                                <el-table-column label="정보수정" class-name="data-table-cell "
+                                                 label-class-name="data-table-header " :min-width="140">
+                                    <template slot-scope="scope">
+                                        <el-link @click="empUpdateStep1(scope.row.eid)" data-toggle="modal" data-target="#empUpdate">[수정]</el-link>
+                                        <el-link @click="empUnrealDelete(scope.row.eid)" data-toggle="modal">[가삭제]</el-link>
+                                        <el-link @click="empRealDelete(scope.row.eid)" data-toggle="modal">[실삭제]</el-link>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <el-button-group>
+                                <template slot-scope="scope">
+                                    <el-button :data="pageData.empListData" data-toggle="modal" data-target="#empCreate">직원생성</el-button>
+                                </template>
+                            </el-button-group>
+                            <el-pagination small layout="prev, pager, next" :total="pageData.count"
+                                           :page-size="pageData.searchData.countPerPage" :current-page.sync="pageData.searchData.pageNo"
+                                           @current-change="list">
+                            </el-pagination>
+                        </div>
+                    </div>
+                    <div>
+                        <el-form ref="form" :model="pageData.emplistConditionSearchData">
+                            <el-form-item label="리스트 조건 검색">
+                                <el-row type="flex">
+                                    <el-select v-model="pageData.emplistConditionSearchData.condition" placeholder="조건을 선택하세요">
+                                        <el-option v-for="item in pageData.emplistCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
+                                    </el-select>
+                                    <el-input v-model="pageData.emplistConditionSearchData.item" style="width: 500px;"></el-input>
+                                    <el-button @click="empList">검색</el-button>
+                                </el-row>
+                            </el-form-item>
+                        </el-form>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button @click="idClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- -------------------- 직원 생성 -------------------- -->
+    <div class="modal fade" id="empCreate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+        <div class="modal-dialog modal_div" role="document">
+            <div class="modal-content">
+                <div class="modal-common">
+                    <div class="modal-header">
+                        <h3>신규 직원 등록</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-contents-wrap">
+                            <template>
+                                <div>
+                                    <el-form ref="form" :model="pageData.createEmpInfo" style="margin-left: 20px;">
+                                        <el-form-item label="이름" style="display: inline-block;">
+                                            <el-input v-model="pageData.createEmpInfo.ename" style="width: 350px;"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="이메일" style="display: inline-block;">
+                                            <el-input v-model="pageData.createEmpInfo.eemail" style="width: 350px;"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="휴대폰" style="display: inline-block;">
+                                            <el-input v-model="pageData.createEmpInfo.ephone" style="width: 350px;"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="소속" style="display: inline-block;">
+                                            <el-input v-model="pageData.createEmpInfo.eposition" style="width: 350px;"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="직급" style="display: inline-block;">
+                                            <el-input v-model="pageData.createEmpInfo.eaffiliation" style="width: 350px;"></el-input>
+                                        </el-form-item>
+                                    </el-form>
+                                </div>
+                                <div>
+                                    <el-button @click="createEmp" style="margin-left: 20px;">저장</el-button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- -------------------- 직원 업데이트 -------------------- -->
+    <div class="modal fade" id="empUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+        <div class="modal-dialog modal_div" role="document">
+            <div class="modal-content">
+                <div class="modal-common">
+                    <div class="modal-header">
+                        <h3>직원 정보 업데이트</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-contents-wrap">
+                            <div>
+                                <el-form ref="form" :model="pageData.empUpdateData" style="margin-left: 20px;">
+                                    <el-form-item label="이름" style="display: inline-block;">
+                                        <el-input v-model="pageData.empUpdateData.ename" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="이메일" style="display: inline-block;">
+                                        <el-input v-model="pageData.empUpdateData.eemail" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="휴대폰" style="display: inline-block;">
+                                        <el-input v-model="pageData.empUpdateData.ephone" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="소속" style="display: inline-block;">
+                                        <el-input v-model="pageData.empUpdateData.eposition" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="직급" style="display: inline-block;">
+                                        <el-input v-model="pageData.empUpdateData.eaffiliation" style="width: 350px;"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                            <div>
+                                <el-button @click="empUpdateStep2" style="margin-left: 20px;">저장</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- --------------------------------------------------------------------------------------- -->
+</div>
+<th:block layout:fragment="scriptBeforeCreateVue">
+    <script>
+        let localData = {
+            listData: [],
+            empListData: [],
+            count: 0,
+            searchData: {
+                fromData: '',
+                toDate: '',
+                pageNo: 1,
+                countPerPage: 5,
+            },
+            searchCompid: {
+                searchCompid: ''
+            },
+            trainData: {},
+            etc : {
+                dateRange: '',
+            },
+            temp: {
+                cid:'',
+            },
+            createEmpInfo: {},
+            compUpdateData: {
+                cid: ''
+            },
+            empUpdateData: {},
+            listConditionSearchData: {
+                item: ''
+            },
+            emplistConditionSearchData: {
+                item: ''
+            },
+            listCondition: [
+                {conditionText: "회사명+대표명", conditionValue: "cname+cboss"},
+                {conditionText: "대표전화", conditionValue: "ccall"},
+                {conditionText: "법인번호", conditionValue: "cnumber"}
+            ],
+            emplistCondition: [
+                {conditionText: "이름", conditionValue: "ename"},
+                {conditionText: "이메일", conditionValue: "eemail"},
+                {conditionText: "휴대폰", conditionValue: "ephone"},
+                {conditionText: "소속", conditionValue: "eposition"},
+                {conditionText: "직급", conditionValue: "eaffiliation"}
+            ],
+        }
+
+        let localMethod = {
+            // --------------------------------- COMP ---------------------------------
+            list: function () {
+                this.pageData.trainData.fromDate = '';
+                this.pageData.trainData.toDate = '';
+                if (this.pageData.etc.dateRange != '') {
+                    this.pageData.searchData.fromDate = this.pageData.etc.dateRange[0];
+                    this.pageData.searchData.toDate = this.pageData.etc.dateRange[1];
+                }
+                if (this.pageData.listConditionSearchData.item == '') {
+                    // 전체 리스트 조회
+                    axiosGet("/api/company/compController", { /*params: this.pageData.searchData */},
+                        function (response) {
+                            vueApp.pageData.listData = [];
+                            vueApp.pageData.listData = response.data.list;
+                            /*vueApp.pageData.count = response.data.count;*/ //페이징을 위한 코드
+                            console.log("list실행완료")
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    // 조건 리스트 조회
+                    axiosPost("/api/company/compController/listConditionSearch", vueApp.pageData.listConditionSearchData,
+                        function (response) {
+                            alert("리스트 조건 검색 완료");
+                            vueApp.pageData.listData = [];
+                            vueApp.pageData.listData = response.data.list;
+                            console.log("listConditionSearch실행완료")
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                }
+            },
+            compUpdateStep1: function (cid) {
+                vueApp.pageData.compUpdateData.cid = cid;
+                axiosGet("/api/company/compController/" + cid, null,
+                    function (response) {
+                        vueApp.pageData.compUpdateData = response.data.list[0];
+                    },
+                    function (error) {
+                        alert(error);
+                        console.log(error);
+                    }
+                )
+            },
+            compUpdateStep2: function () {
+                axiosPut("/api/company/compController", vueApp.pageData.compUpdateData,
+                    function () {
+                        alert("업데이트 성공");
+                        $('#compUpdate').modal('hide');
+                        vueApp.list();
+                    },
+                    function (error) {
+                        alert(error);
+                        console.log(error);
+                    }
+                )
+            },
+            compUnrealDelete: function (cid) {
+                if (confirm("가삭제를 진행하시겠습니까?") == true){
+                    axiosPut("/api/company/compController/" + cid, null,
+                        function () {
+                            alert("가삭제가 완료되었습니다");
+                            vueApp.list();
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    return false;
+                }
+
+            },
+            compRealDelete: function (cid) {
+                if (confirm("실삭제를 진행하시겠습니까?") == true) {
+                    axiosDelete("/api/company/compController/" + cid, null,
+                        function () {
+                            alert("실삭제가 완료되었습니다");
+                            vueApp.list();
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    return false;
+                }
+            },
+            // --------------------------------- EMP ----------------------------------
+            empList: function(cid) {
+                // 전체 리스트 조회 (새로고침 포함)
+                if (this.pageData.searchCompid.searchCompid == '') {
+                    this.pageData.searchCompid.searchCompid = cid; // 직원 생성 시 회사 구분을 위한 id
+                }
+                if(this.pageData.emplistConditionSearchData.item == '') {
+                    vueApp.pageData.empListData = [];
+                    axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
+                        function (response) {
+                            vueApp.pageData.empListData = response.data.list;
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    // 조건 리스트 조회
+                    vueApp.pageData.emplistConditionSearchData.searchCompid = vueApp.pageData.searchCompid.searchCompid
+                    axiosPost("/api/employee/empController/emplistConditionSearch", vueApp.pageData.emplistConditionSearchData,
+                        function (response) {
+                            alert("리스트 조건 검색 완료");
+                            vueApp.pageData.empListData = [];
+                            vueApp.pageData.empListData = response.data.list;
+                            console.log("emplistConditionSearch실행완료")
+                            $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                }
+            },
+            idClean: function () {
+                vueApp.pageData.searchCompid.searchCompid = '';
+            },
+            createEmp: function() {
+                vueApp.pageData.createEmpInfo.searchCompid = vueApp.pageData.searchCompid.searchCompid;
+                vueApp.pageData.createEmpInfo.eview = true;
+                axiosPost("/api/employee/empController/create", vueApp.pageData.createEmpInfo,
+                    function (response) {
+                        if (response.data === "중복된 사원입니다(이름과 이메일이 중복)") {
+                            vueApp.pageData.createEmpInfo.ename = '';
+                            vueApp.pageData.createEmpInfo.eemail = '';
+                            vueApp.pageData.createEmpInfo.ephone = '';
+                            vueApp.pageData.createEmpInfo.eposition = '';
+                            vueApp.pageData.createEmpInfo.eaffiliation = '';
+                            alert("중복된 사원입니다(이름과 이메일이 중복)");
+                        } else {
+                            alert("등록 성공");
+                            vueApp.pageData.createEmpInfo = {}; // 다시 직원 생성을 눌렀을 때 input 값이 채워져 있는 것을 방지하기위해 데이터 비워주기
+                            $('#empCreate').modal('hide'); // 저장 완료되면 modal창 닫기
+                            vueApp.empList() //직원 리스트 DB에서 다시 로드
+                            $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                        }
+                    },
+                    function (error) {
+                        alert(error);
+                        console.log(error);
+                    }
+                );
+            },
+            empUpdateStep1: function (eid) {
+                vueApp.pageData.empUpdateData.eid = eid;
+                axiosGet("/api/employee/empController/updateStep/" + eid, null,
+                    function (response) {
+                        vueApp.pageData.empUpdateData = response.data.list[0];
+                    },
+                    function (error) {
+                        alert(error);
+                        console.log(error);
+                    }
+                )
+            },
+            empUpdateStep2: function (){
+                axiosPut("/api/employee/empController", vueApp.pageData.empUpdateData,
+                    function (response) {
+                        alert("업데이트 성공");
+                        $('#empUpdate').modal('hide')
+                        vueApp.empList() //직원 리스트 DB에서 다시 로드
+                        $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                    },
+                    function (error) {
+                        alert(error);
+                        console.log(error);
+                    }
+                )
+            },
+            empUnrealDelete: function (eid) {
+                if (confirm("가삭제를 진행하시겠습니까?") == true){
+                    axiosPut("/api/employee/empController/" + eid, null,
+                        function () {
+                            alert("가삭제가 완료되었습니다");
+                            vueApp.empList() //직원 리스트 DB에서 다시 로드
+                            $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    return false;
+                }
+
+            },
+            empRealDelete: function (eid) {
+                if (confirm("실삭제를 진행하시겠습니까?") == true) {
+                    axiosDelete("/api/employee/empController/" + eid, null,
+                        function () {
+                            alert("실삭제가 완료되었습니다");
+                            vueApp.empList() //직원 리스트 DB에서 다시 로드
+                            $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                        },
+                        function (error) {
+                            alert(error);
+                            console.log(error);
+                        }
+                    )
+                } else {
+                    return false;
+                }
+            },
+        }
+
+        function vueMounted() {
+            this.list();
+        }
+    </script>
+</th:block>
+
+<th:block layout:fragment="scriptAfterCreateVue"></th:block>
+</html>

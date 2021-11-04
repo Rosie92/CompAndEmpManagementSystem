@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorator="layouts/defaultLayout">
+<div layout:fragment="content">
+    <template>
+        <div>
+            <h1>회사 신규 등록</h1>
+            <el-form ref="form" :model="pageData.createComp">
+                <el-form-item label="회사명">
+                    <el-input v-model="pageData.createComp.cname"></el-input>
+                </el-form-item>
+                <el-form-item label="대표자명">
+                    <el-input v-model="pageData.createComp.cboss"></el-input>
+                </el-form-item>
+                <el-form-item label="대표전화">
+                    <el-input v-model="pageData.createComp.ccall"></el-input>
+                </el-form-item>
+                <el-form-item label="법인번호">
+                    <el-input v-model="pageData.createComp.cnumber"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div>
+            <el-button @click="create">저장</el-button>
+        </div>
+    </template>
+</div>
+<th:block layout:fragment="scriptBeforeCreateVue">
+    <script>
+        let localData = {
+            createComp: {
+                cname: "",
+                cboss: "",
+                ccall: "",
+                cnumber: "",
+                cview: true,
+            }
+        };
+
+        let localMethod = {
+            create: function() {
+                axiosPost("/api/company/compController", vueApp.pageData.createComp,
+                    function (response) {
+                        alert("회사 등록 성공");
+                        location.href = "/view/Company/CompCreate";
+                    }
+                );
+            },
+        }
+    </script>
+</th:block>
+
+<th:block layout:fragment="scriptAfterCreateVue"></th:block>
+</html>

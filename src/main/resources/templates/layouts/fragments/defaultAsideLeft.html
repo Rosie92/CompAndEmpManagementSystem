@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="asideLeftFragment">
+    <el-row>
+        <el-col>
+            <div id="menu" class="main-menu" mode="horizontal" unique-opened>  <!--:default-active="activeTopMenuIndex"-->
+                <div class="card">
+                    <div class="card-header" id="home">
+                        <a href="/view/Home/Index">Home</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="headingOne">
+                        <button index="2" data-toggle="collapse" data-target="#collapseOne" aria-controls="collapseOne" aria-expanded="false">
+                            <span>Compnay</span>
+                        </button>
+                    </div>
+                    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#menu">
+                        <div class="card-body">
+                            <el-menu class="left-menu" :collapse="isLeftMenuCollapse"><!-- :default-active="activeLeftMenuIndex"-->
+                                <el-menu-item index="1" @click="handleMenuItemClick('/view/Company/CompTable')">
+                                    <span slot="title">
+                                        <a href="/view/Company/CompTable">회사목록</a>
+                                    </span>
+                                </el-menu-item>
+                                <el-menu-item index="1" @click="handleMenuItemClick('/view/Company/CompCreate')">
+                                    <span slot="title">
+                                        <a href="/view/Company/CompCreate">회사등록</a>
+                                    </span>
+                                </el-menu-item>
+                            </el-menu>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </el-col>
+    </el-row>
+</div>
+</html>
