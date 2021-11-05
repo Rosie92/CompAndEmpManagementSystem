@@ -7,10 +7,16 @@ import jcpmv2.jkcho.Repository.IcompJpaTryRepository;
 import jcpmv2.jkcho.Repository.IempJpaTryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -34,9 +40,11 @@ public class CompService {
     }
 
 
-    public ListDto<CompDto> findAll() {
-        List<CompInfo> CompList = icompJpaTryRepository.findAll(Sort.by(Sort.Direction.ASC, "cname","cboss")/*searchingDto*/);
-        /*Long listCount = icompJpaTryRepository.count();*/
+    public ListDto<CompDto> findAll(PagingDto pagingDto) {
+        System.out.println("pageNo in Dto : " + pagingDto.getPageNo());
+        List<CompInfo> CompList = icompJpaTryRepository.findWithPagination(PageRequest.of(0 + pagingDto.getPageNo(), 10));
+        System.out.println("CompList.size() " + CompList.size());
+        Long listCount = icompJpaTryRepository.count();
         int count = 0;
         int q = 0;
         while(q < CompList.size()) {
@@ -64,7 +72,7 @@ public class CompService {
             List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
             return ListDto.<CompDto>builder()
                     .list(CompListData)
-                    /*.listCount(listCount)*/
+                    .listCount(listCount)
                     .build();
         }
     }

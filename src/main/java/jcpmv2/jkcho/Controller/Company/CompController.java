@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
 import javax.validation.Valid;
 
 @RestController
@@ -16,9 +17,9 @@ public class CompController {
     private CompService compService;
 
     /*--------------------------------------SELECT--------------------------------------*/
-    @GetMapping()
-    public ResponseEntity<ListDto<CompDto>> findAll( /*SearchingDto searchingDto*/) {
-        return ResponseEntity.ok(compService.findAll(/*searchingDto*/));
+    @GetMapping("/{pageNo}")
+    public ResponseEntity<ListDto<CompDto>> findAll(PagingDto pagingDto) {
+        return ResponseEntity.ok(compService.findAll(pagingDto));
     }
 
     @PostMapping("/listConditionSearch")
@@ -34,7 +35,7 @@ public class CompController {
     }
 
     /*--------------------------------------UPDATE--------------------------------------*/
-    @GetMapping("/{cid}")
+    @GetMapping("/updateReady/{cid}")
     public ResponseEntity<ListDto<CompDto>> compUpdateReady(CompDto compDto){
         return ResponseEntity.ok(compService.compUpdateReady(compDto));
     }

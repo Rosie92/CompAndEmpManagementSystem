@@ -31,8 +31,8 @@
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination small layout="prev, pager, next" :total="pageData.pagingData.listCount"
-                       :page-size="pageData.pagingData.countPerPage" :current-page.sync="pageData.pagingData.pageNo"
+        <el-pagination small layout="prev, pager, next" :total="pageData.pData.listCount"
+                       :page-size="pageData.pData.countPerPage" :current-page.sync="pageData.pData.pageNo"
                        @current-change="list">
         </el-pagination>
     </div>
@@ -134,8 +134,8 @@
                                     <el-button :data="pageData.empListData" data-toggle="modal" data-target="#empCreate">직원생성</el-button>
                                 </template>
                             </el-button-group>
-                            <el-pagination small layout="prev, pager, next" :total="pageData.count"
-                                           :page-size="pageData.searchData.countPerPage" :current-page.sync="pageData.searchData.pageNo"
+                            <el-pagination small layout="prev, pager, next" :total="pageData.pData.listCount"
+                                           :page-size="pageData.pData.countPerPage" :current-page.sync="pageData.pData.pageNo"
                                            @current-change="list">
                             </el-pagination>
                         </div>
@@ -250,12 +250,12 @@
 <th:block layout:fragment="scriptBeforeCreateVue">
     <script>
         let localData = {
-            listData: [],
+            listData: {},
             empListData: [],
             count: 0,
-            pagingData: {
+            pData: {
                 pageNo: 1,
-                countPerPage: 5
+                countPerPage: 0
             },
             searchCompid: {
                 searchCompid: ''
@@ -297,15 +297,23 @@
             list: function () {
                 if (this.pageData.listConditionSearchData.item == '') {
                     // 전체 리스트 조회
-                    axiosGet("/api/company/compController", { /*params: this.pageData.pagingData*/ },
+                    console.log("pageNo")
+                    console.log(this.pageData.pData.pageNo)
+                    let pageNo = this.pageData.pData.pageNo - 1;
+                    console.log("pageNo-1")
+                    console.log(pageNo)
+                    axiosGet("/api/company/compController/" + pageNo, null,
                         function (response) {
                             vueApp.pageData.listData = [];
                             vueApp.pageData.listData = response.data.list;
-                            /*vueApp.pageData.pagingData.listCount = response.data.listCount;*/
-                            console.log("list실행완료")
+                            vueApp.pageData.pData.listCount = response.data.listCount;
+                            vueApp.pageData.pData.countPerPage = vueApp.pageData.pData.listCount / 10 + 6
+                            console.log(vueApp.pageData.listData)
+                            /*console.log("count : ", vueApp.pageData.pData.listCount)*/
+                            /*console.log("list실행완료")*/
                         },
                         function (error) {
-                            alert(error);
+                            alert("에러메시지 : " + error);
                             console.log(error);
                         }
                     )
@@ -327,7 +335,7 @@
             },
             compUpdateStep1: function (cid) {
                 vueApp.pageData.compUpdateData.cid = cid;
-                axiosGet("/api/company/compController/" + cid, null,
+                axiosGet("/api/company/compController/updateReady/" + cid, null,
                     function (response) {
                         vueApp.pageData.compUpdateData = response.data.list[0];
                     },
