@@ -17,6 +17,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.swing.*;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -27,6 +28,8 @@ public class CompService {
     private IcompJpaTryRepository icompJpaTryRepository;
     @Autowired
     private IempJpaTryRepository iempJpaTryRepository;
+
+    /*class CustomerNotFoundException (message: String) : Exception(message)*/
 
     @Transactional
     public void create(CompDto compDto) {
@@ -41,11 +44,9 @@ public class CompService {
 
 
     public ListDto<CompDto> findAll(PagingDto pagingDto) {
-        System.out.println("pageNo in Dto : " + pagingDto.getPageNo());
         List<CompInfo> CompList = icompJpaTryRepository.findWithPagination(PageRequest.of(0 + pagingDto.getPageNo(), 10));
-        System.out.println("CompList.size() " + CompList.size());
         Long listCount = icompJpaTryRepository.count();
-        int count = 0;
+        /*int count = 0;  // query = where c_view=ture 로 대체
         int q = 0;
         while(q < CompList.size()) {
             if (count == 1) {
@@ -65,8 +66,11 @@ public class CompService {
             } else if(CompList.size() == 1 && CompList.get(q).getCview() == true) {
                 q++;
             }
-        }
+        }*/
         if (CompList.size() == 0) {
+        /*return ListDto.<CompDto>builder()
+                .nullCheck("null")
+                .build();*/
             return null;
         } else {
             List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
@@ -80,16 +84,22 @@ public class CompService {
     @Transactional
     public ListDto<CompDto> listConditionSearch(CompDto compDto) {
         List<CompInfo> CompList = null;
+        Long ConditionCount = null;
         if (compDto.getCondition().equals("cname+cboss")) {
-            CompList = icompJpaTryRepository.findAllByCnameOrCboss(compDto.getItem());
+            CompList = icompJpaTryRepository.findAllByCnameOrCbossPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCnameOrCboss(compDto.getItem());
         } else if (compDto.getCondition().equals("ccall")) {
-            CompList = icompJpaTryRepository.findAllByCcall(compDto.getItem());
+            CompList = icompJpaTryRepository.findAllByCcallPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCcall(compDto.getItem());
         } else if (compDto.getCondition().equals("cnumber")) {
-            CompList = icompJpaTryRepository.findAllByCnumber(compDto.getItem());
+            CompList = icompJpaTryRepository.findAllByCnumberPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCnumber(compDto.getItem());
         }
+
         List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
         return ListDto.<CompDto>builder()
                 .list(CompListData)
+                .listCount(ConditionCount)
                 .build();
     }
 

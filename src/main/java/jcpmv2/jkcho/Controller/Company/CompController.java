@@ -30,6 +30,15 @@ public class CompController {
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid CompDto compDto) {
+        if (compDto.getCname().equals("")) {
+            throw new NullPointerException();
+        } else if (compDto.getCboss().equals("")) {
+            throw new NullPointerException();
+        } else if (compDto.getCcall().equals("")) {
+            throw new NullPointerException();
+        } else if (compDto.getCnumber().equals("")) {
+            throw new NullPointerException();
+        }
         compService.create(compDto);
         return ResponseEntity.ok().build();
     }

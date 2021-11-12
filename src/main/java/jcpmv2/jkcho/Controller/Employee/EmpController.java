@@ -19,8 +19,8 @@ public class EmpController {
 
     /*--------------------------------------SELECT--------------------------------------*/
     @PostMapping()
-    public ResponseEntity<ListDto<EmpDto>> findAllByEcompidOrderByEname(@RequestBody @Valid EmpDto empDto) {/*SearchingDto searchingDto*/
-        return ResponseEntity.ok(empService.findAllByEcompidOrderByEname(empDto));/*searchingDto*/
+    public ResponseEntity<ListDto<EmpDto>> findAllByEcompidOrderByEnamePaging(@RequestBody @Valid EmpDto empDto) {/*SearchingDto searchingDto*/
+        return ResponseEntity.ok(empService.findAllByEcompidOrderByEnamePaging(empDto));/*searchingDto*/
     }
 
     @PostMapping("/emplistConditionSearch")

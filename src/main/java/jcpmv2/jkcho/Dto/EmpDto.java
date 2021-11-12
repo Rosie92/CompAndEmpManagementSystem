@@ -20,4 +20,5 @@ public class EmpDto {
     private Boolean eview;
     private String item;
     private String condition;
+    private int pageNo;
 }

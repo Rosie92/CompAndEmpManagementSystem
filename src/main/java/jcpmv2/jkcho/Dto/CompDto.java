@@ -16,4 +16,5 @@ public class CompDto {
     private Boolean cview;
     private String item;
     private String condition;
+    private int pageNo;
 }

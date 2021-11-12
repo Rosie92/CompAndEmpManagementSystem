@@ -26,16 +26,20 @@ public interface IcompJpaTryRepository extends JpaRepository<CompInfo, Long> {
 
     List<CompInfo> findAllByCid(Long cid);
 
-    @Modifying
-    @Query(value = "select c from CompInfo c where c.cview=true and c.cname like %?1% or c.cboss like %?1% order by c.cname, c.cboss")
-    List<CompInfo> findAllByCnameOrCboss(String item);
-    @Modifying
-    @Query(value = "select c from CompInfo c where c.cview=true and c.ccall like %?1% order by c.cname, c.cboss")
-    List<CompInfo> findAllByCcall(String item);
-    @Modifying
-    @Query(value = "select c from CompInfo c where c.cview=true and c.cnumber like %?1% order by c.cname, c.cboss")
-    List<CompInfo> findAllByCnumber(String item);
-
-    @Query(value = "select c from CompInfo c order by c.cname, c.cboss")
+    @Query(value = "select c from CompInfo c where c.cview=true order by c.cname, c.cboss")
     List<CompInfo> findWithPagination(Pageable pageable);
+
+    @Query(value = "select c from CompInfo c where c.cview=true and c.cname like %?1% or c.cboss like %?1% order by c.cname, c.cboss")
+    List<CompInfo> findAllByCnameOrCbossPaging(String item, PageRequest of);
+    @Query(value = "select c from CompInfo c where c.cview=true and c.ccall like %?1% order by c.cname, c.cboss")
+    List<CompInfo> findAllByCcallPaging(String item, PageRequest of);
+    @Query(value = "select c from CompInfo c where c.cview=true and c.cnumber like %?1% order by c.cname, c.cboss")
+    List<CompInfo> findAllByCnumberPaging(String item, PageRequest of);
+
+    @Query(value = "select count(c) from CompInfo c where c.cview=true and c.cname like %?1% or c.cboss like %?1%")
+    Long conditionCountByCnameOrCboss(String item);
+    @Query(value = "select count(c) from CompInfo c where c.cview=true and c.ccall like %?1%")
+    Long conditionCountByCcall(String item);
+    @Query(value = "select count(c) from CompInfo c where c.cview=true and c.cnumber like %?1%")
+    Long conditionCountByCnumber(String item);
 }
