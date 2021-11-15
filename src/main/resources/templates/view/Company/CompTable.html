@@ -302,7 +302,7 @@
                 if (this.pageData.listConditionSearchData.item == '') {
                     // 전체 리스트 조회
                     let pageNo = this.pageData.pData.pageNo - 1;
-                    axiosGet("/api/company/compController/"/* + pageNo*/, null,
+                    axiosGet("/api/company/compController/" + pageNo, null,
                         function (response) {
                             vueApp.pageData.listData = [];
                             vueApp.pageData.listData = response.data.list;
