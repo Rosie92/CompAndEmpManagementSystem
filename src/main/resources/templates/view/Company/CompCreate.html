@@ -40,7 +40,7 @@
         let localMethod = {
             create: function() {
                 axiosPost("/api/company/compController", vueApp.pageData.createComp,
-                    function (response) {
+                    function () {
                         alert("회사 등록 성공");
                         location.href = "/view/Company/CompCreate";
                     },
@@ -49,7 +49,7 @@
                         alert("에러메시지 : " + error.response.data.errorMessages[0])
                     }
                 );
-            },
+            }
         }
     </script>
 </th:block>

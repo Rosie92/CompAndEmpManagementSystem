@@ -42,4 +42,5 @@ public interface IcompJpaTryRepository extends JpaRepository<CompInfo, Long> {
     Long conditionCountByCcall(String item);
     @Query(value = "select count(c) from CompInfo c where c.cview=true and c.cnumber like %?1%")
     Long conditionCountByCnumber(String item);
+
 }
