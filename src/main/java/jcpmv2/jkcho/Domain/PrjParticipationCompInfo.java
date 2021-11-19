@@ -7,11 +7,11 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "total")
+@Table(name = "prjparticipationcomp")
 @Getter
 @Setter
 @DynamicUpdate
-public class TotalInfo {
+public class PrjParticipationCompInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;

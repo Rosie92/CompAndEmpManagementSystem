@@ -1,14 +1,13 @@
 package jcpmv2.jkcho.Service.Project;
 
-import jcpmv2.jkcho.Domain.CompInfo;
-import jcpmv2.jkcho.Domain.EmpInfo;
 import jcpmv2.jkcho.Domain.PrjInfo;
-import jcpmv2.jkcho.Domain.TotalInfo;
+import jcpmv2.jkcho.Domain.PrjParticipationCompInfo;
+import jcpmv2.jkcho.Domain.IPrjParticipationCompGetName;
 import jcpmv2.jkcho.Dto.*;
 import jcpmv2.jkcho.Mapper.QsolModelMapper;
 import jcpmv2.jkcho.Repository.IcompJpaTryRepository;
 import jcpmv2.jkcho.Repository.IprjJpaTryRepository;
-import jcpmv2.jkcho.Repository.ItotalJpaRepository;
+import jcpmv2.jkcho.Repository.IprjParticipationCompJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +23,7 @@ public class PrjService {
     @Autowired
     private IprjJpaTryRepository iprjJpaTryRepository;
     @Autowired
-    private ItotalJpaRepository itotalJpaRepository;
+    private IprjParticipationCompJpaRepository iprjParticipationCompJpaRepository;
     @Autowired
     private IcompJpaTryRepository icompJpaTryRepository;
 
@@ -66,13 +65,22 @@ public class PrjService {
         iprjJpaTryRepository.save(prjInfo);
     }
 
-    public ListDto<PrjDto> findPnameAndPcontentAndPrjCompTable(PrjDto prjDto) {
-        List<PrjInfo> PrjList = iprjJpaTryRepository.findPnameAndPcontent(prjDto.getPid());
-        if (PrjList.size() == 0) {
+
+    public ListDto<PrjDto> findPnameAndPcontent(PrjDto prjDto) {
+        List<PrjInfo> prjData = iprjJpaTryRepository.findPnameAndPcontent(prjDto.getPid());
+        List<PrjDto> PrjListData = QsolModelMapper.map(prjData, PrjDto.class);
+        return ListDto.<PrjDto>builder()
+                .list(PrjListData)
+                .build();
+    }
+
+    public ListDto<CompDto> findParticipationComp(PrjDto prjDto) {
+        List<IPrjParticipationCompGetName> PrjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid());
+        if (PrjCompList.size() == 0) {
             return null;
         } else {
-            List<PrjDto> PrjListData = QsolModelMapper.map(PrjList, PrjDto.class);
-            return ListDto.<PrjDto>builder()
+            List<CompDto> PrjListData = QsolModelMapper.map(PrjCompList, CompDto.class);
+            return ListDto.<CompDto>builder()
                     .list(PrjListData)
                     /*.compid(PrjListData.get(0).getEcompid())*/
                     .build();
@@ -81,9 +89,10 @@ public class PrjService {
 
     @Transactional
     public void prjAddComp(PrjDto prjDto) {
-        TotalInfo totalInfo = new TotalInfo();
-        totalInfo.setPid(prjDto.getPid());
-        totalInfo.setCid(prjDto.getCid());
-        itotalJpaRepository.save(totalInfo);
+        PrjParticipationCompInfo prjParticipationCompInfo = new PrjParticipationCompInfo();
+        prjParticipationCompInfo.setPid(prjDto.getPid());
+        prjParticipationCompInfo.setCid(prjDto.getCid());
+        iprjParticipationCompJpaRepository.save(prjParticipationCompInfo);
     }
+
 }

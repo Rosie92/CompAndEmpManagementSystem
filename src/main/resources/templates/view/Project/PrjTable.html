@@ -52,22 +52,25 @@
                             <table>
                                 <colgroup>
                                     <tr>
-                                        <th>프로젝트 명</th>
+                                        <th style="font-size: smaller">프로젝트 명</th>
                                         <tr>
-                                            <th>{{ pageData.prjShowData.pname }}</th>
+                                            <th style="font-size: large">{{ pageData.prjShowData.pname }}</th>
                                         </tr>
                                     </tr>
                                     <tr>
-                                        <th>프로젝트 설명</th>
+                                        <th style="font-size: smaller; margin-top: 7px;">프로젝트 설명</th>
                                     <tr>
-                                        <th>{{ pageData.prjShowData.pcontent }}</th>
+                                        <th style="font-size: large">{{ pageData.prjShowData.pcontent }}</th>
                                     </tr>
                                     </tr>
                                 </colgroup>
                             </table>
-                            <el-table :data="pageData.prjComp" style="width:100%">
+                            <el-table :data="pageData.prjParticipationComp" style="width:100%">
                                 <el-table-column prop="cname" label="프로젝트 참여 회사" class-name="data-table-cell "
-                                                 label-class-name="data-table-header" :min-width="200">
+                                                 label-class-name="data-table-header" :min-width="400">
+                                </el-table-column>
+                                <el-table-column prop="count" label="참여 직원 수" class-name="data-table-cell "
+                                                 label-class-name="data-table-header" :min-width="100">
                                 </el-table-column>
                                 <el-table-column label="정보수정" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="140">
@@ -154,7 +157,7 @@
             listData: {},
             compListData: {},
             prjAddData: {},
-            prjComp: {},
+            prjParticipationComp: {},
             pData: {
                 pageNo: 1,
                 countPerPage: 5
@@ -213,13 +216,26 @@
                     )
                 }
             },
-            prjShow: function(pid) {
+            prjShow: function(pid) { // 프로젝트 명, 프로젝트 내용 불러오기
                 this.pageData.prjAddData.pid = pid;
+                // 새로운 회사 프로젝트 참여 생성 AND 회사 등록 후 참여 회사 테이블을 새로고침하기 위해 필요한 데이터를 저장
                 axiosPost("/api/project/prjController/" + pid, null,
                     function (response) {
                         vueApp.pageData.prjShowData = response.data.list[0];
-                        vueApp.pageData.prjComp = response.data.prjCompList;
+                        vueApp.prjShowParticipationCompSearch(pid)
                         $('#prjShow').modal('show')
+                    },
+                    function (error) {
+                        console.log(error.response);
+                        alert("에러메시지 : " + error.response.data.errorMessages[0])
+                    }
+                )
+            },
+            prjShowParticipationCompSearch: function(pid) { // 클릭한 프로젝트에 참여하고있는 회사 정보 불러오기
+                axiosPost("/api/project/prjController/participationCompSearch/" + pid, null,
+                    function (response) {
+                        console.log(response.data)
+                        vueApp.pageData.prjParticipationComp = response.data.list;
                     },
                     function (error) {
                         console.log(error.response);
@@ -267,6 +283,7 @@
                         function () {
                             alert("참여가 완료되었습니다");
                             $('#compAddPrj').modal('hide')
+                            vueApp.prjShow(vueApp.pageData.prjAddData.pid);
                             $('#prjShow').modal('show')
                         },
                         function (error) {

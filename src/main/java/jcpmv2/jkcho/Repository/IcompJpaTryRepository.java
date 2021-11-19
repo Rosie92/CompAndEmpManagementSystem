@@ -1,7 +1,7 @@
 package jcpmv2.jkcho.Repository;
 
 import jcpmv2.jkcho.Domain.CompInfo;
-import jcpmv2.jkcho.Dto.PagingDto;
+import jcpmv2.jkcho.Domain.IPrjParticipationCompGetName;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
@@ -43,4 +42,6 @@ public interface IcompJpaTryRepository extends JpaRepository<CompInfo, Long> {
     @Query(value = "select count(c) from CompInfo c where c.cview=true and c.cnumber like %?1%")
     Long conditionCountByCnumber(String item);
 
+    @Query(value = "select c.cname as cname from CompInfo c, PrjParticipationCompInfo t, PrjInfo p where t.pid = p.pid and t.cid = c.cid and p.pid=?1 order by c.cname")
+    List<IPrjParticipationCompGetName> findParticipationComp(Long pid);//프로젝트에 참여하고있는 Comp목록을 찾는
 }
