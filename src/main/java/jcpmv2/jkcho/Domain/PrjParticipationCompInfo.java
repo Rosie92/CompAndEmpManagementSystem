@@ -14,7 +14,8 @@ import javax.persistence.*;
 public class PrjParticipationCompInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    @Column(name="id")
+    private Long id;
 
     @Column(name = "p_id")
     private Long pid;
@@ -24,7 +25,4 @@ public class PrjParticipationCompInfo {
 
     @Column(name = "e_id")
     private Long eid;
-
-    @Column(name = "p_content")
-    private String pcontent;
 }

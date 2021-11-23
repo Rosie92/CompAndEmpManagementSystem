@@ -16,5 +16,7 @@ public class PrjDto {
     private String condition;
     private int pageNo;
     private Long cid;
+    private Long[] eid;
+    private String duplicateCheck;
 
 }

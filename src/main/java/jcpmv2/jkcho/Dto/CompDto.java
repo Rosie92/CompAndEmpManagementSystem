@@ -17,4 +17,5 @@ public class CompDto {
     private String item;
     private String condition;
     private int pageNo;
+    private String count; // 프로젝트 참여 회사 테이블에서 참여 직원 수 표시를 위해 정보를 담아올 그릇
 }

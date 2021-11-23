@@ -42,6 +42,6 @@ public interface IcompJpaTryRepository extends JpaRepository<CompInfo, Long> {
     @Query(value = "select count(c) from CompInfo c where c.cview=true and c.cnumber like %?1%")
     Long conditionCountByCnumber(String item);
 
-    @Query(value = "select c.cname as cname from CompInfo c, PrjParticipationCompInfo t, PrjInfo p where t.pid = p.pid and t.cid = c.cid and p.pid=?1 order by c.cname")
+    @Query(value = "SELECT c.cname as cname, COUNT(t.cid) as count, t.cid as cid FROM PrjParticipationCompInfo t left outer join CompInfo c on c.cid=t.cid where t.pid=?1 GROUP BY t.cid ORDER BY c.cname")
     List<IPrjParticipationCompGetName> findParticipationComp(Long pid);//프로젝트에 참여하고있는 Comp목록을 찾는
 }

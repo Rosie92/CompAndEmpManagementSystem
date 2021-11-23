@@ -1,6 +1,7 @@
 package jcpmv2.jkcho.Domain;
 
 public interface IPrjParticipationCompGetName {
+
     String getCname();
     /*
         CompInfo, PrjInfo, PrjParticipationCompInfo
@@ -10,4 +11,6 @@ public interface IPrjParticipationCompGetName {
         Repository에서 CompInfo만 참조하고 있기에 오류가 발생
         이 정보들을 담아오기 위해 임시로 해당 interface를 활용
      */
+    String getCount();
+    String getCid();
 }

@@ -389,12 +389,12 @@
             },
             // --------------------------------- EMP ----------------------------------
             empList: function(cid) {
-                        // 전체 리스트 조회 (새로고침 포함)
-                        if (this.pageData.searchCompid.searchCompid == '') {
-                            this.pageData.searchCompid.searchCompid = cid; // 직원 생성 시 회사 구분을 위한 id
-                        }
-                        if(this.pageData.emplistConditionSearchData.item == '') {
-                            this.pageData.empListData = [];
+                // 전체 리스트 조회 (새로고침 포함)
+                if (this.pageData.searchCompid.searchCompid == '') {
+                    this.pageData.searchCompid.searchCompid = cid; // 직원 생성 시 회사 구분을 위한 id
+                }
+                if(this.pageData.emplistConditionSearchData.item == '') {
+                    this.pageData.empListData = [];
                     this.pageData.searchCompid.pageNo = this.pageData.empPData.pageNo -1;
                     axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
                         function (response) {

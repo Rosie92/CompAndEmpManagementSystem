@@ -44,6 +44,20 @@ public class prjController {
         return ResponseEntity.ok(prjService.findParticipationComp(prjDto));
     }
 
+    @PostMapping("/compPartiEmpSearch")
+    public ResponseEntity<ListDto<EmpDto>> compPartiEmpSearch(@RequestBody @Valid PrjDto prjDto) {
+        return ResponseEntity.ok(prjService.compPartiEmpSearch(prjDto));
+    }
+
+    @PostMapping("/prjAddCompDeplicateCheck")
+    public ResponseEntity<HttpStatus> prjAddCompDeplicateCheck(@RequestBody @Valid PrjDto prjDto) {
+        prjService.prjAddCompDeplicateCheck(prjDto);
+        if(prjDto.getDuplicateCheck().equals("이미 참여한 회사입니다")) {
+            prjDto.setDuplicateCheck("중복체크확인");
+            return new ResponseEntity("이미 참여한 회사입니다", HttpStatus.OK);
+        }
+        return ResponseEntity.ok().build();
+    }
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid PrjDto prjDto) {
@@ -55,9 +69,10 @@ public class prjController {
         prjService.create(prjDto);
         return ResponseEntity.ok().build();
     }
-    @PostMapping("/prjAddComp")
-    public ResponseEntity<HttpStatus> prjAddComp(@RequestBody @Valid PrjDto prjDto) {
-        prjService.prjAddComp(prjDto);
+
+    @PostMapping("/prjAddCompEmpLastStep")
+    public ResponseEntity<HttpStatus> prjAddCompEmpLastStep(@RequestBody @Valid PrjDto prjDto) {
+        prjService.prjAddCompEmpLastStep(prjDto);
         return ResponseEntity.ok().build();
     }
 }

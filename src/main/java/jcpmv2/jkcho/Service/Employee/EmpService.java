@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,29 +25,36 @@ public class EmpService {
     private IempJpaTryRepository iempJpaTryRepository;
 
     public ListDto<EmpDto> findAllByEcompidOrderByEnamePaging(EmpDto empDto) { /*SearchingDto searchingDto*/
-        List<EmpInfo> EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePaging(empDto.getSearchCompid(), PageRequest.of(0 + empDto.getPageNo(), 10));/*searchingDto*/
-        Long empListCount = iempJpaTryRepository.count();
-        /*int count = 0;     query where eview=true 로 대체
-        int q = 0;
-        while(q < EmpList.size()) {
-            if (count == 1) {
-                q = 0;
-                count = 0;
-            }
-            if (EmpList.get(q).getEview() == false) {
-                EmpList.remove(q);
-                if (q == 0) {
-                    count = 1;
-                } else {
-                    q--;
+        List<EmpInfo> EmpList = new ArrayList<>();
+        Long empListCount = null;
+        if (empDto.getPagingOff().equals("off")) {
+            EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePagingOff(empDto.getSearchCompid());
+
+        } else {
+            EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePaging(empDto.getSearchCompid(), PageRequest.of(0 + empDto.getPageNo(), 10));/*searchingDto*/
+            empListCount = iempJpaTryRepository.count();
+            /*int count = 0;     query where eview=true 로 대체
+            int q = 0;
+            while(q < EmpList.size()) {
+                if (count == 1) {
+                    q = 0;
+                    count = 0;
                 }
-            }
-            if(EmpList.size() != 1) {
-                q++;
-            } else if(EmpList.size() == 1 && EmpList.get(q).getEview() == true) {
-                q++;
-            }
-        }*/
+                if (EmpList.get(q).getEview() == false) {
+                    EmpList.remove(q);
+                    if (q == 0) {
+                        count = 1;
+                    } else {
+                        q--;
+                    }
+                }
+                if(EmpList.size() != 1) {
+                    q++;
+                } else if(EmpList.size() == 1 && EmpList.get(q).getEview() == true) {
+                    q++;
+                }
+            }*/
+        }
         if (EmpList.size() == 0) {
             return null;
         } else {

@@ -21,4 +21,5 @@ public class EmpDto {
     private String item;
     private String condition;
     private int pageNo;
+    private String pagingOff;
 }

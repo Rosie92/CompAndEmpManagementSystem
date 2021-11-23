@@ -1,11 +1,10 @@
 package jcpmv2.jkcho.Service.Project;
 
-import jcpmv2.jkcho.Domain.PrjInfo;
-import jcpmv2.jkcho.Domain.PrjParticipationCompInfo;
-import jcpmv2.jkcho.Domain.IPrjParticipationCompGetName;
+import jcpmv2.jkcho.Domain.*;
 import jcpmv2.jkcho.Dto.*;
 import jcpmv2.jkcho.Mapper.QsolModelMapper;
 import jcpmv2.jkcho.Repository.IcompJpaTryRepository;
+import jcpmv2.jkcho.Repository.IempJpaTryRepository;
 import jcpmv2.jkcho.Repository.IprjJpaTryRepository;
 import jcpmv2.jkcho.Repository.IprjParticipationCompJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -26,6 +27,8 @@ public class PrjService {
     private IprjParticipationCompJpaRepository iprjParticipationCompJpaRepository;
     @Autowired
     private IcompJpaTryRepository icompJpaTryRepository;
+    @Autowired
+    private IempJpaTryRepository iempJpaTryRepository;
 
     public ListDto<PrjDto> findAll(PagingDto pagingDto) {
         List<PrjInfo> PrjList = iprjJpaTryRepository.findWithPagination(PageRequest.of(0 + pagingDto.getPageNo(), 10));
@@ -75,24 +78,48 @@ public class PrjService {
     }
 
     public ListDto<CompDto> findParticipationComp(PrjDto prjDto) {
-        List<IPrjParticipationCompGetName> PrjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid());
-        if (PrjCompList.size() == 0) {
+        List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid());
+        if (prjCompList.size() == 0) {
             return null;
         } else {
-            List<CompDto> PrjListData = QsolModelMapper.map(PrjCompList, CompDto.class);
+            List<CompDto> prjListData = QsolModelMapper.map(prjCompList, CompDto.class);
             return ListDto.<CompDto>builder()
-                    .list(PrjListData)
+                    .list(prjListData)
                     /*.compid(PrjListData.get(0).getEcompid())*/
                     .build();
         }
     }
 
     @Transactional
-    public void prjAddComp(PrjDto prjDto) {
-        PrjParticipationCompInfo prjParticipationCompInfo = new PrjParticipationCompInfo();
-        prjParticipationCompInfo.setPid(prjDto.getPid());
-        prjParticipationCompInfo.setCid(prjDto.getCid());
-        iprjParticipationCompJpaRepository.save(prjParticipationCompInfo);
+    public void prjAddCompDeplicateCheck(PrjDto prjDto) {
+        Optional<PrjParticipationCompInfo> duplicateCid = iprjParticipationCompJpaRepository.findTopByCidAndPid(prjDto.getCid(), prjDto.getPid());
+        if (duplicateCid.isPresent()) {
+            prjDto.setDuplicateCheck("이미 참여한 회사입니다");
+        }
     }
 
+    public ListDto<EmpDto> compPartiEmpSearch(PrjDto prjDto) {
+        List<IPrjParticipationEmpGetData> prjEmpList = iempJpaTryRepository.findParticipationComp(prjDto.getPid(), prjDto.getCid());
+        if (prjEmpList.size() == 0) {
+            return null;
+        } else {
+            List<EmpDto> prjListData = QsolModelMapper.map(prjEmpList, EmpDto.class);
+            return ListDto.<EmpDto>builder()
+                    .list(prjListData)
+                    /*.compid(PrjListData.get(0).getEcompid())*/
+                    .build();
+        }
+    }
+
+    public void prjAddCompEmpLastStep(PrjDto prjDto) {
+        int count = 0;
+        while (count < prjDto.getEid().length) {
+            PrjParticipationCompInfo prjParticipationCompInfo = new PrjParticipationCompInfo();
+            prjParticipationCompInfo.setPid(prjDto.getPid());
+            prjParticipationCompInfo.setCid(prjDto.getCid());
+            prjParticipationCompInfo.setEid(prjDto.getEid()[count]);
+            iprjParticipationCompJpaRepository.save(prjParticipationCompInfo);
+            count++;
+        }
+    }
 }

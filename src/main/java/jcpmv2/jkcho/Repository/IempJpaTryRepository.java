@@ -1,6 +1,7 @@
 package jcpmv2.jkcho.Repository;
 
 import jcpmv2.jkcho.Domain.EmpInfo;
+import jcpmv2.jkcho.Domain.IPrjParticipationEmpGetData;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,6 +16,8 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
 
     @Query(value = "select e from EmpInfo e where e.eview=true and e.ecompid=?1 order by e.ename")
     List<EmpInfo> findAllByEcompidOrderByEnamePaging(Long searchCompid, PageRequest of);
+    @Query(value = "select e from EmpInfo e where e.eview=true and e.ecompid=?1 order by e.ename")
+    List<EmpInfo> findAllByEcompidOrderByEnamePagingOff(Long searchCompid);
 
     Optional<EmpInfo> findByEnameAndEphone(String ename, String ephone);
 
@@ -49,4 +52,8 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     Long conditionCountByEposition(String item);
     @Query(value = "select count(e) from EmpInfo e where e.eview=true and e.eaffiliation like %?1%")
     Long conditionCountByEaffiliation(String item);
+
+    @Query(value = "SELECT e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation FROM PrjParticipationCompInfo t join EmpInfo e on t.cid=?2 AND t.pid=?1 AND e.ecompid=t.cid AND e.eid=t.eid ORDER BY e.ename")
+    List<IPrjParticipationEmpGetData> findParticipationComp(Long pid, Long cid);
+
 }
