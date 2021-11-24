@@ -22,6 +22,7 @@
         </div>
         <div>
             <el-button @click="create">저장</el-button>
+            <el-button @click="moveTable">회사목록</el-button>
         </div>
     </template>
 </div>
@@ -49,6 +50,9 @@
                         alert("에러메시지 : " + error.response.data.errorMessages[0])
                     }
                 );
+            },
+            moveTable: function() {
+                location.href = "/view/Company/CompTable";
             }
         }
     </script>

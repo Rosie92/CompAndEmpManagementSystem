@@ -67,18 +67,11 @@ public class CompService {
                 q++;
             }
         }*/
-        if (CompList.size() == 0) {
-        /*return ListDto.<CompDto>builder()
-                .nullCheck("null")
-                .build();*/
-            return null;
-        } else {
-            List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
-            return ListDto.<CompDto>builder()
-                    .list(CompListData)
-                    .listCount(listCount)
-                    .build();
-        }
+        List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
+        return ListDto.<CompDto>builder()
+                .list(CompListData)
+                .listCount(listCount)
+                .build();
     }
 
     @Transactional

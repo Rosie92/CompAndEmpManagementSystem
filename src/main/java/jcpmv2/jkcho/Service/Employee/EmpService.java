@@ -2,6 +2,7 @@ package jcpmv2.jkcho.Service.Employee;
 
 import jcpmv2.jkcho.Domain.CompInfo;
 import jcpmv2.jkcho.Domain.EmpInfo;
+import jcpmv2.jkcho.Domain.IPrjParticipationEmpGetData;
 import jcpmv2.jkcho.Dto.CompDto;
 import jcpmv2.jkcho.Dto.EmpDto;
 import jcpmv2.jkcho.Dto.ListDto;
@@ -26,10 +27,12 @@ public class EmpService {
 
     public ListDto<EmpDto> findAllByEcompidOrderByEnamePaging(EmpDto empDto) { /*SearchingDto searchingDto*/
         List<EmpInfo> EmpList = new ArrayList<>();
-        Long empListCount = null;
-        if (empDto.getPagingOff().equals("off")) {
-            EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePagingOff(empDto.getSearchCompid());
-
+        List<IPrjParticipationEmpGetData> joinList = new ArrayList<>();
+        Long empListCount = 0L;
+        if (empDto.getPagingOff().equals("off") && empDto.getParticipationEmpRemove().equals("true")) {
+            joinList = iempJpaTryRepository.findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(empDto.getPid(), empDto.getCid());
+        } else if (empDto.getPagingOff().equals("off")) {
+            EmpList = iempJpaTryRepository.findAllBySearchCompidOrderByEnamePagingOff(empDto.getSearchCompid());
         } else {
             EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePaging(empDto.getSearchCompid(), PageRequest.of(0 + empDto.getPageNo(), 10));/*searchingDto*/
             empListCount = iempJpaTryRepository.count();
@@ -55,8 +58,12 @@ public class EmpService {
                 }
             }*/
         }
-        if (EmpList.size() == 0) {
-            return null;
+        if (empDto.getPagingOff().equals("off") && empDto.getParticipationEmpRemove().equals("true")) {
+            List<EmpDto> EmpListData = QsolModelMapper.map(joinList, EmpDto.class);
+            return ListDto.<EmpDto>builder()
+                    .list(EmpListData)
+                    .compid(EmpListData.get(0).getEcompid())
+                    .build();
         } else {
             List<EmpDto> EmpListData = QsolModelMapper.map(EmpList, EmpDto.class);
             return ListDto.<EmpDto>builder()

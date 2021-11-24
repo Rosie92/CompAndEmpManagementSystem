@@ -21,5 +21,9 @@ public class EmpDto {
     private String item;
     private String condition;
     private int pageNo;
+
     private String pagingOff;
+    private String participationEmpRemove; // 프로젝트 > 회사 직원 목록 > 새로운 직원을 참가시키기 위해 직원 목록을 불러올 때, 이미 참가중인 직원을 제거하기 위한 구분 item
+    private Long cid;
+    private Long pid;
 }

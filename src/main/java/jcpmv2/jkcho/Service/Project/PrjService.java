@@ -118,8 +118,56 @@ public class PrjService {
             prjParticipationCompInfo.setPid(prjDto.getPid());
             prjParticipationCompInfo.setCid(prjDto.getCid());
             prjParticipationCompInfo.setEid(prjDto.getEid()[count]);
+            prjParticipationCompInfo.setCview(prjDto.getCview());
+            prjParticipationCompInfo.setEview(prjDto.getEview());
             iprjParticipationCompJpaRepository.save(prjParticipationCompInfo);
             count++;
         }
+    }
+
+    public ListDto<PrjDto> updatePrjStep(PrjDto prjDto) {
+        List<PrjInfo> prjList = iprjJpaTryRepository.findAllByPId(prjDto.getPid());
+        List<PrjDto> prjListData = QsolModelMapper.map(prjList, PrjDto.class);
+        return  ListDto.<PrjDto>builder()
+                .list(prjListData)
+                .build();
+    }
+
+    @Transactional
+    public void updatePrjTry(PrjDto prjDto) {
+        // Dirty Checking 활용
+        PrjInfo prjInfo = iprjJpaTryRepository.findById(prjDto.getPid()).orElse(null);
+        prjInfo.setPname(prjDto.getPname());
+        prjInfo.setPcontent(prjDto.getPcontent());
+    }
+
+    public void unrealDelete(Long pid) {
+        // DirtyChecking 활용
+        PrjInfo prjInfo = iprjJpaTryRepository.findById(pid).orElse(null);
+        prjInfo.setPview(false);
+    }
+
+    @Transactional
+    public void realDelete(Long pid) {
+        iprjParticipationCompJpaRepository.deleteByPid(pid);
+        iprjJpaTryRepository.deleteByPid(pid);
+    }
+
+    public void prjCompUnrealDelete(PrjDto prjDto) {
+        iprjParticipationCompJpaRepository.prjCompUnrealDelete(prjDto.getPid(), prjDto.getCid());
+    }
+
+    @Transactional
+    public void prjCompRealDelete(PrjDto prjDto) {
+        iprjParticipationCompJpaRepository.deleteByPidAndCid(prjDto.getPid(), prjDto.getCid());
+    }
+
+    public void prjEmpUnrealDelete(EmpDto empDto) {
+        iprjParticipationCompJpaRepository.prjEmpUnrealDelete(empDto.getPid(), empDto.getCid(), empDto.getEid());
+    }
+
+    @Transactional
+    public void prjEmpRealDelete(EmpDto empDto) {
+        iprjParticipationCompJpaRepository.deleteByEid(empDto.getPid(), empDto.getCid(), empDto.getEid());
     }
 }

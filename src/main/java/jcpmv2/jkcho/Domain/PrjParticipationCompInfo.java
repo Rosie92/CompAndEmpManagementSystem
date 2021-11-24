@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import javax.sound.sampled.BooleanControl;
 
 @Entity
 @Table(name = "prjparticipationcomp")
@@ -25,4 +26,10 @@ public class PrjParticipationCompInfo {
 
     @Column(name = "e_id")
     private Long eid;
+
+    @Column(name = "c_view")
+    private Boolean cview;
+
+    @Column(name = "e_view")
+    private Boolean eview;
 }

@@ -12,6 +12,8 @@ public class PrjDto {
     private String pname;
     private String pcontent;
     private Boolean pview;
+    private Boolean cview;
+    private Boolean eview;
     private String item;
     private String condition;
     private int pageNo;

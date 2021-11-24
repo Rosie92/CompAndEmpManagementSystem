@@ -22,4 +22,9 @@ public interface IprjJpaTryRepository extends JpaRepository<PrjInfo, Long> {
 
     @Query(value = "select p from PrjInfo p where p.pid=?1")
     List<PrjInfo> findPnameAndPcontent(Long pid);
+
+    @Query(value = "select p from PrjInfo p where p.pid=?1")
+    List<PrjInfo> findAllByPId(Long pid);
+
+    void deleteByPid(Long pid);
 }

@@ -45,6 +45,7 @@
                     </el-select>
                     <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
                     <el-button @click="list">검색</el-button>
+                    <el-button @click="moveCreate">회사등록</el-button>
                 </el-row>
             </el-form-item>
         </el-form>
@@ -261,7 +262,9 @@
                 countPerPage: 5
             },
             searchCompid: {
-                searchCompid: ''
+                searchCompid: '',
+                pagingOff: "",
+                getParticipationEmpRemove: ""
             },
             trainData: {},
             etc : {
@@ -296,6 +299,9 @@
         }
 
         let localMethod = {
+            moveCreate: function() {
+                location.href = "/view/Company/CompCreate";
+            },
             // --------------------------------- COMP ---------------------------------
             list: function () {
                 if (this.pageData.listConditionSearchData.item == '') {
@@ -308,8 +314,13 @@
                             vueApp.pageData.pData.listCount = response.data.listCount / 2;
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
+                                console.log(error.response);
+                                alert("등록된 회사가 없습니다.")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 } else {
@@ -323,8 +334,13 @@
                             console.log("listConditionSearch실행완료")
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
+                                console.log(error.response);
+                                alert("등록된 회사가 없습니다.")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 }
@@ -403,8 +419,13 @@
                             $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
+                                console.log(error.response);
+                                alert("해당 회사에 등록된 직원이 없습니다.")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 } else {
@@ -420,8 +441,13 @@
                             $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
+                                console.log(error.response);
+                                alert("해당 회사에 등록된 직원이 없습니다.")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 }

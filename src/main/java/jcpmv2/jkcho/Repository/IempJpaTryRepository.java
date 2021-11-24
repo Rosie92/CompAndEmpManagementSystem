@@ -17,7 +17,11 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     @Query(value = "select e from EmpInfo e where e.eview=true and e.ecompid=?1 order by e.ename")
     List<EmpInfo> findAllByEcompidOrderByEnamePaging(Long searchCompid, PageRequest of);
     @Query(value = "select e from EmpInfo e where e.eview=true and e.ecompid=?1 order by e.ename")
-    List<EmpInfo> findAllByEcompidOrderByEnamePagingOff(Long searchCompid);
+    List<EmpInfo> findAllBySearchCompidOrderByEnamePagingOff(Long searchCompid);
+    @Query(value = "select e.eid as eid, e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation from " +
+            "PrjParticipationCompInfo t join EmpInfo e on e.ecompid=?2 and t.pid=?1 and e.ecompid=t.cid and t.cview=true and t.eview=true and e.eid not in " +
+            "(select t.eid from PrjParticipationCompInfo t where t.cid=?2) group by e.eid order by e.ename")
+    List<IPrjParticipationEmpGetData> findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(Long pid, Long cid);
 
     Optional<EmpInfo> findByEnameAndEphone(String ename, String ephone);
 
@@ -53,7 +57,9 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     @Query(value = "select count(e) from EmpInfo e where e.eview=true and e.eaffiliation like %?1%")
     Long conditionCountByEaffiliation(String item);
 
-    @Query(value = "SELECT e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation FROM PrjParticipationCompInfo t join EmpInfo e on t.cid=?2 AND t.pid=?1 AND e.ecompid=t.cid AND e.eid=t.eid ORDER BY e.ename")
+    @Query(value = "SELECT e.eid as eid, e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation " +
+            "FROM PrjParticipationCompInfo t join EmpInfo e on t.cid=?2 AND t.pid=?1 AND e.ecompid=t.cid AND e.eid=t.eid AND t.cview=true AND " +
+            "t.eview=true ORDER BY e.ename")
     List<IPrjParticipationEmpGetData> findParticipationComp(Long pid, Long cid);
 
 }
