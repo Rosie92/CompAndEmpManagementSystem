@@ -78,13 +78,15 @@ public class PrjService {
     }
 
     public ListDto<CompDto> findParticipationComp(PrjDto prjDto) {
-        List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid());
+        List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid(), PageRequest.of(0 + prjDto.getPageNo(), 10));
+        Long listCount = iprjParticipationCompJpaRepository.getCountData(prjDto.getPid());
         if (prjCompList.size() == 0) {
             return null;
         } else {
             List<CompDto> prjListData = QsolModelMapper.map(prjCompList, CompDto.class);
             return ListDto.<CompDto>builder()
                     .list(prjListData)
+                    .listCount(listCount)
                     /*.compid(PrjListData.get(0).getEcompid())*/
                     .build();
         }
@@ -99,13 +101,15 @@ public class PrjService {
     }
 
     public ListDto<EmpDto> compPartiEmpSearch(PrjDto prjDto) {
-        List<IPrjParticipationEmpGetData> prjEmpList = iempJpaTryRepository.findParticipationComp(prjDto.getPid(), prjDto.getCid());
+        List<IPrjParticipationEmpGetData> prjEmpList = iempJpaTryRepository.findParticipationComp(prjDto.getPid(), prjDto.getCid(), PageRequest.of(0 + prjDto.getPageNo(), 10));
+        Long listCount = iprjParticipationCompJpaRepository.getEmpCountData(prjDto.getPid(), prjDto.getCid());
         if (prjEmpList.size() == 0) {
             return null;
         } else {
             List<EmpDto> prjListData = QsolModelMapper.map(prjEmpList, EmpDto.class);
             return ListDto.<EmpDto>builder()
                     .list(prjListData)
+                    .listCount(listCount)
                     /*.compid(PrjListData.get(0).getEcompid())*/
                     .build();
         }
@@ -133,7 +137,7 @@ public class PrjService {
                 .build();
     }
 
-    @Transactional
+    /*@Transactional*/
     public void updatePrjTry(PrjDto prjDto) {
         // Dirty Checking 활용
         PrjInfo prjInfo = iprjJpaTryRepository.findById(prjDto.getPid()).orElse(null);

@@ -20,5 +20,4 @@ public class PrjDto {
     private Long cid;
     private Long[] eid;
     private String duplicateCheck;
-
 }

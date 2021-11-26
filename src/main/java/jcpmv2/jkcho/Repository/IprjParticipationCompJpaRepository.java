@@ -31,4 +31,9 @@ public interface IprjParticipationCompJpaRepository extends JpaRepository<PrjPar
     @Modifying
     @Query(value = "delete from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2 and t.eid=?3")
     void deleteByEid(Long pid, Long cid, Long eid);
+
+    @Query(value = "select count(t) from PrjParticipationCompInfo t where t.pid=?1 and t.cview=true")
+    Long getCountData(Long pid);
+    @Query(value = "select count(t) from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2 and t.eview=true")
+    Long getEmpCountData(Long pid, Long cid);
 }

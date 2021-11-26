@@ -20,7 +20,7 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     List<EmpInfo> findAllBySearchCompidOrderByEnamePagingOff(Long searchCompid);
     @Query(value = "select e.eid as eid, e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation from " +
             "PrjParticipationCompInfo t join EmpInfo e on e.ecompid=?2 and t.pid=?1 and e.ecompid=t.cid and t.cview=true and t.eview=true and e.eid not in " +
-            "(select t.eid from PrjParticipationCompInfo t where t.cid=?2) group by e.eid order by e.ename")
+            "(select t.eid from PrjParticipationCompInfo t where t.cid=?2 and t.pid=?1) group by e.eid order by e.ename")
     List<IPrjParticipationEmpGetData> findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(Long pid, Long cid);
 
     Optional<EmpInfo> findByEnameAndEphone(String ename, String ephone);
@@ -60,6 +60,6 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     @Query(value = "SELECT e.eid as eid, e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation " +
             "FROM PrjParticipationCompInfo t join EmpInfo e on t.cid=?2 AND t.pid=?1 AND e.ecompid=t.cid AND e.eid=t.eid AND t.cview=true AND " +
             "t.eview=true ORDER BY e.ename")
-    List<IPrjParticipationEmpGetData> findParticipationComp(Long pid, Long cid);
+    List<IPrjParticipationEmpGetData> findParticipationComp(Long pid, Long cid, PageRequest of);
 
 }

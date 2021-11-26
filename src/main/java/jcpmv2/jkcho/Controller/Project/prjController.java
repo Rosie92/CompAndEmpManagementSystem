@@ -37,8 +37,8 @@ public class prjController {
         return ResponseEntity.ok(prjService.findPnameAndPcontent(prjDto));
     }
 
-    @PostMapping("/participationCompSearch/{pid}")
-    public ResponseEntity<ListDto<CompDto>> findParticipationComp(@Valid PrjDto prjDto) {
+    @PostMapping("/participationCompSearch")
+    public ResponseEntity<ListDto<CompDto>> findParticipationComp(@RequestBody @Valid PrjDto prjDto) {
         /*
         오류 해결을 위하여 @RequestBody 삭제
         Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported

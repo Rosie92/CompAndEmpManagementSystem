@@ -44,5 +44,5 @@ public interface IcompJpaTryRepository extends JpaRepository<CompInfo, Long> {
 
     @Query(value = "SELECT c.cname as cname, COUNT(t.cid) as count, t.cid as cid FROM PrjParticipationCompInfo t join" +
             " CompInfo c on t.cview=true and c.cid=t.cid and t.eview=true where t.pid=?1 GROUP BY t.cid ORDER BY c.cname")
-    List<IPrjParticipationCompGetName> findParticipationComp(Long pid);//프로젝트에 참여하고있는 Comp목록을 찾는
+    List<IPrjParticipationCompGetName> findParticipationComp(Long pid, PageRequest of);//프로젝트에 참여하고있는 Comp목록을 찾는
 }
