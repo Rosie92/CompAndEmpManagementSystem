@@ -373,7 +373,9 @@
             },
             prjShow: function(pid) { // 프로젝트 명, 프로젝트 내용 불러오기
                 this.pageData.dataDeliveryArea.pid = pid;
-                this.pageData.dataDeliveryArea.eid = [];
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 // 새로운 회사 프로젝트 참여 생성 AND 회사 등록 후 참여 회사 테이블을 새로고침하기 위해 필요한 데이터를 저장
                 axiosPost("/api/project/prjController/" + pid, null,
                     function (response) {
@@ -388,6 +390,9 @@
             },
             prjShowParticipationCompSearch: function() { // prjShow 완료 후, 클릭한 프로젝트에 참여하고있는 회사 정보 불러오기
                 this.pageData.dataDeliveryArea.pageNo = this.pageData.prjInCompPData.pageNo - 1;
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 axiosPost("/api/project/prjController/participationCompSearch", vueApp.pageData.dataDeliveryArea,
                     function (response) {
                         vueApp.pageData.prjParticipationComp = response.data.list;
@@ -446,6 +451,9 @@
             prjAddCompDeplicateCheck: function (cid) { // 프로젝트 참가 진행 중 회사 이름 클릭 시 중복 체크
                 this.pageData.dataDeliveryArea.cid = cid;
                 this.pageData.dataDeliveryArea.duplicateCheck = "중복체크확인";
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 if (confirm("해당 회사를 프로젝트에 참여시킵니다") == true){
                     axiosPost("/api/project/prjController/prjAddCompDeplicateCheck", vueApp.pageData.dataDeliveryArea,
                         function (response) {
@@ -468,7 +476,9 @@
                 this.pageData.searchCompid.searchCompid = this.pageData.dataDeliveryArea.cid;
                 this.pageData.prjAddEmpListData = [];
                 this.pageData.searchCompid.participationEmpRemove = "false";
-                this.pageData.dataDeliveryArea.eid = [];
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
                 function (response) {
                     vueApp.pageData.prjAddEmpListData = response.data.list;
@@ -491,7 +501,9 @@
             },
             prjAddCompEmpLastStep: function () { // 프로젝트 참가에서 선택된 회사와 체크된 직원들을 DB에 등록하는 마지막 과정
                 let count = 0;
-                this.pageData.dataDeliveryArea.eid = [];
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 while(count < this.pageData.multipleSelection.length) {
                     this.pageData.dataDeliveryArea.eid[count] = this.pageData.multipleSelection[count].eid;
                     count++;
@@ -533,7 +545,9 @@
             compEmpShow: function(cid) { // 프로젝트 상세에서 클릭한 회사의 프로젝트 참여 직원 목록
                 this.pageData.dataDeliveryArea.cid = cid;
                 this.pageData.dataDeliveryArea.pageNo = this.pageData.empPData.pageNo -1;
-                this.pageData.dataDeliveryArea.eid = [];
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 axiosPost("/api/project/prjController/compPartiEmpSearch", vueApp.pageData.dataDeliveryArea,
                     function (response) {
                         vueApp.pageData.compEmpData = response.data.list;
@@ -626,7 +640,9 @@
             },
             prjCompUnrealDelete: function (cid) {
                 this.pageData.dataDeliveryArea.cid = cid;
-                this.pageData.dataDeliveryArea.eid = [];
+                if(this.pageData.dataDeliveryArea.eid == "") {
+                    this.pageData.dataDeliveryArea.eid = [];
+                }
                 if (confirm("가삭제를 진행하시겠습니까?") == true){
                     axiosPut("/api/project/prjController/prjCompUnrealDelete", vueApp.pageData.dataDeliveryArea,
                         function () {
