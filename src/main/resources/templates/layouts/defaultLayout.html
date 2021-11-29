@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head th:replace="layouts/fragments/defaultConfig::configFragment">
+</head>
+
+<body>
+<th:block layout:fragment="scriptBeforeCreateVue"></th:block>
+<style></style>
+<script th:inline="javascript"></script>
+<div>
+    <div id="vueApp">
+        <el-container>
+            <el-header class="header">
+                <div class="popup-wrap">
+                    <h1>Company EmployeeManagement System</h1>
+                    <span class="line"></span>
+                </div>
+            </el-header>
+        </el-container>
+        <el-container>
+            <div class="contents-bg"></div>
+
+            <el-header>
+                <div th:replace="layouts/fragments/defaultHeader::headerFragment"></div>
+            </el-header>
+            <el-container>
+                <el-aside width="60">
+                    <div th:replace="layouts/fragments/defaultAsideLeft::asideLeftFragment"></div>
+                </el-aside>
+                <div class="container-wrap">
+                    <div class="main-container">
+                        <el-main>
+                            <div layout:fragment="content">
+                            </div>
+                        </el-main>
+<!--                        <template>
+                            <div class="registration-title">
+                                <el-dialog class="password-wrap" width="30%" :visible.sync="passwordDialogVisible" :close-on-click-modal=false center>
+                                    <h3>비밀번호<span>변경하기</span></h3>
+                                    <div>
+                                        <el-form ref="form" :model="passwordToUpdate" class="password-popup">
+                                            <el-form-item label="현재 비밀번호">
+                                                <el-input v-model="passwordToUpdate.currentPassword" show-password>
+                                                </el-input>
+                                            </el-form-item>
+                                            <el-form-item label="새 비밀번호 ">
+                                                <el-input v-model="passwordToUpdate.password" show-password></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="새 비밀번호 확인">
+                                                <el-input v-model="passwordToUpdate.confirmPassword" show-password>
+                                                </el-input>
+                                            </el-form-item>
+                                        </el-form>
+                                    </div>
+                                    <div slot="footer" class="dialog-footer">
+                                        <el-button type="primary" @click="updatePassword()" class="save">변경</el-button>
+                                        <el-button @click="passwordDialogVisible=false" class="exit">닫기</el-button>
+                                    </div>
+                                </el-dialog>
+                            </div>
+                        </template>-->
+                    </div>
+                    <el-footer>
+                        <div th:replace="layouts/fragments/defaultFooter::footerFragment"></div>
+                    </el-footer>
+                </div>
+            </el-container>
+        </el-container>
+    </div>
+</div>
+    <div class="modal fade" id="errorModal" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal_div" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalTitle"></h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="exit" onClick="closePopup();">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    ELEMENT.locale(ELEMENT.lang.ko);
+
+    // 숫자 타입에서 쓸 수 있도록 format() 함수 추가
+    Number.prototype.format = function () {
+        if (this == 0) return 0;
+
+        var reg = /(^[+-]?\d+)(\d{3})/;
+        var n = (this + '');
+
+        while (reg.test(n)) n = n.replace(reg, '$1' + ',' + '$2');
+
+        return n;
+    };
+
+    // 문자열 타입에서 쓸 수 있도록 format() 함수 추가
+    String.prototype.formatNumber = function () {
+        var num = parseFloat(this);
+        if (isNaN(num)) return "0";
+
+        return num.format();
+    };
+
+    function formatNumber(row, column, cellValue, index) {
+        return (cellValue.format());
+    }
+
+    function formatVoltage(row, column, cellValue, index) {
+        return cellValue.format() + "V";
+    }
+
+    function formatAmpere(row, column, cellValue, index) {
+        return cellValue.format() + "V";
+    }
+
+    function formatMilliAmpere(row, column, cellValue, index) {
+        return cellValue.format() + "mA";
+    }
+
+    let basicPasswordToUpdate = {
+        currentPassword: "",
+        password: "",
+        confirmPassword: ""
+    }
+
+    let commonMethod = {
+        handleMenuItemClick: function (el) {
+            location.href = el;
+        },
+        logout: function () {
+            axiosPost("/api/security/logout", null,
+                function (response) {
+                    location.href = "/view/security/login";
+                },
+                function (error) {
+                    alert("로그아웃하는 중 에러가 발생했습니다.");
+                }
+            )
+        },
+        showUpdatePassword: function () {
+            console.log("showUpdatePassword called");
+            vueApp.passwordToUpdate = Object.assign({}, basicPasswordToUpdate);
+            vueApp.passwordDialogVisible = true;
+        },
+        updatePassword: function () {
+            // console.log("passwordToUpdate", vueApp.passwordToUpdate);
+            axiosPut("/api/system/manager/updatePassword", vueApp.passwordToUpdate,
+                function () {
+                    commonNotifyMessage("완료", "비밀번호를 변경하였습니다.")
+                    vueApp.list();
+                    vueApp.passwordDialogVisible = false;
+                },
+                commonNotifyError
+            );
+        },
+        numberFormatter: formatNumber,
+        voltageFormatter: formatVoltage,
+        ampereFormatter: formatAmpere,
+        milliAmpereFormatter: formatMilliAmpere
+    };
+
+
+
+
+    let pageMethod = Object.assign(commonMethod, localMethod);
+
+    if (typeof vueCreated == 'undefined') {
+        vueCreated = null;
+    }
+    if (typeof vueMounted == 'undefined') {
+        vueMounted = null;
+    }
+
+    Vue.component("qsol-page-title", {
+        props: ["title"],
+        template: "<div class='page-title'>{{ title }}</div>"
+    })
+
+    let vueApp = new Vue({
+        el: '#vueApp',
+        data: {
+            pageData: localData,
+            errorMessage: '',
+            errorMessages: [],
+            /*activeTopMenuIndex: activeTopMenuIndex,
+            activeLeftMenuIndex: activeLeftMenuIndex,*/
+            isLeftMenuCollapse: false,
+            passwordToUpdate: basicPasswordToUpdate,
+            passwordDialogVisible: false
+        },
+        methods: pageMethod,
+        create: vueCreated,
+        mounted: vueMounted
+    });
+
+    function axiosGet(url, data, success, failure) {
+        axios.get(url, data)
+            .then(success)
+            .catch(failure);
+    }
+
+    function axiosPost(url, data, success, failure) {
+        axios.post(url, data)
+            .then(success)
+            .catch(failure);
+    }
+
+    function axiosPut(url, data, success, failure) {
+        axios.put(url, data)
+            .then(success)
+            .catch(failure);
+    }
+
+    function axiosDelete(url, data, success, failure) {
+        axios.delete(url, data)
+            .then(success)
+            .catch(failure);
+    }
+
+
+    const leftMenuCell = document.querySelector("#collapseOne");
+    const leftMenuModule = document.querySelector("#collapseTwo");
+    const leftMenuPack = document.querySelector("#collapseThree");
+    const leftMenuSystem = document.querySelector("#collapseFour");
+
+    const leftMenuCellHeader = document.querySelector("#headingOne button");
+    const leftMenuModuleHeader = document.querySelector("#headingTwo button");
+    const leftMenuPackHeader = document.querySelector("#headingThree button");
+    const leftMenuSystemHeader = document.querySelector("#headingFour button");
+
+    const locationURL = window.location.pathname;
+    const menuURL = locationURL.split("/")
+    if (menuURL[2] === "cell") {
+        leftMenuCell.classList.add("show");
+        leftMenuModule.classList.remove("show");
+        leftMenuPack.classList.remove("show");
+        leftMenuSystem.classList.remove("show");
+
+        leftMenuCellHeader.classList.remove("collapsed");
+        leftMenuModuleHeader.classList.add("collapsed");
+        leftMenuPackHeader.classList.add("collapsed");
+        leftMenuSystemHeader.classList.add("collapsed");
+    } else if (menuURL[2] === "module") {
+        leftMenuCell.classList.remove("show");
+        leftMenuModule.classList.add("show");
+        leftMenuPack.classList.remove("show");
+        leftMenuSystem.classList.remove("show");
+
+        leftMenuCellHeader.classList.add("collapsed");
+        leftMenuModuleHeader.classList.remove("collapsed");
+        leftMenuPackHeader.classList.add("collapsed");
+        leftMenuSystemHeader.classList.add("collapsed");
+    } else if (menuURL[2] === "pack") {
+        leftMenuCell.classList.remove("show");
+        leftMenuModule.classList.remove("show");
+        leftMenuPack.classList.add("show");
+        leftMenuSystem.classList.remove("show");
+
+        leftMenuCellHeader.classList.add("collapsed");
+        leftMenuModuleHeader.classList.add("collapsed");
+        leftMenuPackHeader.classList.remove("collapsed");
+        leftMenuSystemHeader.classList.add("collapsed");
+    } else if (menuURL[2] === "system") {
+        leftMenuCell.classList.remove("show");
+        leftMenuModule.classList.remove("show");
+        leftMenuPack.classList.remove("show");
+        leftMenuSystem.classList.add("show");
+
+        leftMenuCellHeader.classList.add("collapsed");
+        leftMenuModuleHeader.classList.add("collapsed");
+        leftMenuPackHeader.classList.add("collapsed");
+        leftMenuSystemHeader.classList.remove("collapsed");
+    }
+</script>
+<th:block layout:fragment="scriptAfterCreateVue"></th:block>
+</body>
+</html>
