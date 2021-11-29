@@ -290,7 +290,9 @@
             compListData: {},
             compEmpData: {},
             notPartiEmp: {},
-            dataDeliveryArea: {},
+            dataDeliveryArea: {
+                eid: []
+            },
             multipleSelection: [],
             prjParticipationComp: {},
             pData: {
@@ -380,7 +382,7 @@
                 axiosPost("/api/project/prjController/" + pid, null,
                     function (response) {
                         vueApp.pageData.prjShowData = response.data.list[0];
-                        vueApp.prjShowParticipationCompSearch(pid)
+                        vueApp.prjShowParticipationCompSearch()
                     },
                     function (error) {
                         console.log(error.response);
@@ -524,6 +526,7 @@
                                 $('#prjShow').modal('show')
                                 vueApp.compEmpShow(vueApp.pageData.dataDeliveryArea.cid); // 추가된 직원 표시를 위해 새로고침
                                 $('#compEmpShow').modal('show')
+                                vueApp.pageData.dataDeliveryArea.switch == "";
                             } else {
                                 alert("참여가 완료되었습니다");
                                 $('#prjCompAddEmpCheck').modal('hide')
@@ -548,7 +551,7 @@
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
                 }
-                axiosPost("/api/project/prjController/compPartiEmpSearch", vueApp.pageData.dataDeliveryArea,
+                axiosPost("/api/project/prjController/compParticiEmpSearch", vueApp.pageData.dataDeliveryArea,
                     function (response) {
                         vueApp.pageData.compEmpData = response.data.list;
                         vueApp.pageData.empPData.listCount = response.data.listCount / 2;
@@ -566,7 +569,7 @@
                 this.pageData.prjAddEmpListData = [];
                 this.pageData.dataDeliveryArea.pagingOff = "off";
                 this.pageData.dataDeliveryArea.participationEmpRemove = "true";
-                this.pageData.dataDeliveryArea.switch = "true"; // 직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item
+                this.pageData.dataDeliveryArea.switch = "true"; // 직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item, 해당 메소드가 아닌 이후 메소드에서 활용됨
                 this.pageData.dataDeliveryArea.eid = "";
                 console.log(vueApp.pageData.dataDeliveryArea)
                 axiosPost("/api/employee/empController", vueApp.pageData.dataDeliveryArea,

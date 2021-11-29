@@ -2,22 +2,17 @@ package jcpmv2.jkcho.Service.Company;
 
 import jcpmv2.jkcho.Domain.CompInfo;
 import jcpmv2.jkcho.Dto.*;
+import jcpmv2.jkcho.Dto.Comp.CompConditionSearchDataDto;
+import jcpmv2.jkcho.Dto.Comp.CompTableDataDto;
 import jcpmv2.jkcho.Mapper.QsolModelMapper;
 import jcpmv2.jkcho.Repository.IcompJpaTryRepository;
 import jcpmv2.jkcho.Repository.IempJpaTryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.swing.*;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -32,18 +27,18 @@ public class CompService {
     /*class CustomerNotFoundException (message: String) : Exception(message)*/
 
     @Transactional
-    public void create(CompDto compDto) {
+    public void create(CompTableDataDto compTableDataDto) {
         CompInfo compInfo = new CompInfo();
-        compInfo.setCname(compDto.getCname());
-        compInfo.setCboss(compDto.getCboss());
-        compInfo.setCcall(compDto.getCcall());
-        compInfo.setCnumber(compDto.getCnumber());
-        compInfo.setCview(compDto.getCview());
+        compInfo.setCname(compTableDataDto.getCname());
+        compInfo.setCboss(compTableDataDto.getCboss());
+        compInfo.setCcall(compTableDataDto.getCcall());
+        compInfo.setCnumber(compTableDataDto.getCnumber());
+        compInfo.setCview(compTableDataDto.getCview());
         icompJpaTryRepository.save(compInfo);
     }
 
 
-    public ListDto<CompDto> findAll(PagingDto pagingDto) {
+    public ListDto<CompTableDataDto> findAll(PagingDto pagingDto) {
         List<CompInfo> CompList = icompJpaTryRepository.findWithPagination(PageRequest.of(0 + pagingDto.getPageNo(), 10));
         Long listCount = icompJpaTryRepository.count();
         /*int count = 0;  // query = where c_view=ture 로 대체
@@ -67,52 +62,52 @@ public class CompService {
                 q++;
             }
         }*/
-        List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
-        return ListDto.<CompDto>builder()
+        List<CompTableDataDto> CompListData = QsolModelMapper.map(CompList, CompTableDataDto.class);
+        return ListDto.<CompTableDataDto>builder()
                 .list(CompListData)
                 .listCount(listCount)
                 .build();
     }
 
     @Transactional
-    public ListDto<CompDto> listConditionSearch(CompDto compDto) {
+    public ListDto<CompTableDataDto> listConditionSearch(CompConditionSearchDataDto compConditionSearchDataDto) {
         List<CompInfo> CompList = null;
         Long ConditionCount = null;
-        if (compDto.getCondition().equals("cname+cboss")) {
-            CompList = icompJpaTryRepository.findAllByCnameOrCbossPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
-            ConditionCount = icompJpaTryRepository.conditionCountByCnameOrCboss(compDto.getItem());
-        } else if (compDto.getCondition().equals("ccall")) {
-            CompList = icompJpaTryRepository.findAllByCcallPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
-            ConditionCount = icompJpaTryRepository.conditionCountByCcall(compDto.getItem());
-        } else if (compDto.getCondition().equals("cnumber")) {
-            CompList = icompJpaTryRepository.findAllByCnumberPaging(compDto.getItem(), PageRequest.of(0 + compDto.getPageNo(), 10));
-            ConditionCount = icompJpaTryRepository.conditionCountByCnumber(compDto.getItem());
+        if (compConditionSearchDataDto.getCondition().equals("cname+cboss")) {
+            CompList = icompJpaTryRepository.findAllByCnameOrCbossPaging(compConditionSearchDataDto.getItem(), PageRequest.of(0 + compConditionSearchDataDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCnameOrCboss(compConditionSearchDataDto.getItem());
+        } else if (compConditionSearchDataDto.getCondition().equals("ccall")) {
+            CompList = icompJpaTryRepository.findAllByCcallPaging(compConditionSearchDataDto.getItem(), PageRequest.of(0 + compConditionSearchDataDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCcall(compConditionSearchDataDto.getItem());
+        } else if (compConditionSearchDataDto.getCondition().equals("cnumber")) {
+            CompList = icompJpaTryRepository.findAllByCnumberPaging(compConditionSearchDataDto.getItem(), PageRequest.of(0 + compConditionSearchDataDto.getPageNo(), 10));
+            ConditionCount = icompJpaTryRepository.conditionCountByCnumber(compConditionSearchDataDto.getItem());
         }
 
-        List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
-        return ListDto.<CompDto>builder()
+        List<CompTableDataDto> CompListData = QsolModelMapper.map(CompList, CompTableDataDto.class);
+        return ListDto.<CompTableDataDto>builder()
                 .list(CompListData)
                 .listCount(ConditionCount)
                 .build();
     }
 
     @Transactional
-    public ListDto<CompDto> compUpdateReady(CompDto compDto) {
-        List<CompInfo> CompList = icompJpaTryRepository.findAllByCid(compDto.getCid());
-        List<CompDto> CompListData = QsolModelMapper.map(CompList, CompDto.class);
-        return ListDto.<CompDto>builder()
+    public ListDto<CompTableDataDto> compUpdateReady(CompTableDataDto compTableDataDto) {
+        List<CompInfo> CompList = icompJpaTryRepository.findAllByCid(compTableDataDto.getCid());
+        List<CompTableDataDto> CompListData = QsolModelMapper.map(CompList, CompTableDataDto.class);
+        return ListDto.<CompTableDataDto>builder()
                 .list(CompListData)
                 .build();
     }
 
     @Transactional
-    public void compUpdateDirtyChecking(CompDto compDto) {
+    public void update(CompTableDataDto compTableDataDto) {
         // Dirty Checking; nas file 참조
-        CompInfo compInfo = icompJpaTryRepository.findById(compDto.getCid()).orElse(null);
-        compInfo.setCname(compDto.getCname());
-        compInfo.setCboss(compDto.getCboss());
-        compInfo.setCcall(compDto.getCcall());
-        compInfo.setCnumber(compDto.getCnumber());
+        CompInfo compInfo = icompJpaTryRepository.findById(compTableDataDto.getCid()).orElse(null);
+        compInfo.setCname(compTableDataDto.getCname());
+        compInfo.setCboss(compTableDataDto.getCboss());
+        compInfo.setCcall(compTableDataDto.getCcall());
+        compInfo.setCnumber(compTableDataDto.getCnumber());
     }
 
     @Transactional

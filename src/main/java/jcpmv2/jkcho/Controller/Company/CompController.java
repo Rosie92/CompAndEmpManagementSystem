@@ -1,13 +1,12 @@
 package jcpmv2.jkcho.Controller.Company;
 
 import jcpmv2.jkcho.Dto.*;
+import jcpmv2.jkcho.Dto.Comp.*;
 import jcpmv2.jkcho.Service.Company.CompService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityManager;
 import javax.validation.Valid;
 
 @RestController
@@ -18,40 +17,40 @@ public class CompController {
 
     /*--------------------------------------SELECT--------------------------------------*/
     @GetMapping("/{pageNo}")
-    public ResponseEntity<ListDto<CompDto>> findAll(PagingDto pagingDto) {
+    public ResponseEntity<ListDto<CompTableDataDto>> findAll(PagingDto pagingDto) {
         return ResponseEntity.ok(compService.findAll(pagingDto));
     }
 
     @PostMapping("/listConditionSearch")
-    public ResponseEntity<ListDto<CompDto>> listConditionSearch(@RequestBody @Valid CompDto compDto) {
-        return ResponseEntity.ok(compService.listConditionSearch(compDto));
+    public ResponseEntity<ListDto<CompTableDataDto>> listConditionSearch(@RequestBody @Valid CompConditionSearchDataDto compConditionSearchDataDto) {
+        return ResponseEntity.ok(compService.listConditionSearch(compConditionSearchDataDto));
     }
 
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid CompDto compDto) {
-        if (compDto.getCname().equals("")) {
+    public ResponseEntity<HttpStatus> create(@RequestBody @Valid CompTableDataDto compTableDataDto) {
+        if (compTableDataDto.getCname().equals("")) {
             throw new NullPointerException();
-        } else if (compDto.getCboss().equals("")) {
+        } else if (compTableDataDto.getCboss().equals("")) {
             throw new NullPointerException();
-        } else if (compDto.getCcall().equals("")) {
+        } else if (compTableDataDto.getCcall().equals("")) {
             throw new NullPointerException();
-        } else if (compDto.getCnumber().equals("")) {
+        } else if (compTableDataDto.getCnumber().equals("")) {
             throw new NullPointerException();
         }
-        compService.create(compDto);
+        compService.create(compTableDataDto);
         return ResponseEntity.ok().build();
     }
 
     /*--------------------------------------UPDATE--------------------------------------*/
     @GetMapping("/updateReady/{cid}")
-    public ResponseEntity<ListDto<CompDto>> compUpdateReady(CompDto compDto){
-        return ResponseEntity.ok(compService.compUpdateReady(compDto));
+    public ResponseEntity<ListDto<CompTableDataDto>> compUpdateReady(CompTableDataDto compTableDataDto){
+        return ResponseEntity.ok(compService.compUpdateReady(compTableDataDto));
     }
 
     @PutMapping()
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid CompDto compDto) {
-        compService.compUpdateDirtyChecking(compDto);
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid CompTableDataDto compTableDataDto) {
+        compService.update(compTableDataDto);
         return ResponseEntity.ok().build();
     }
 

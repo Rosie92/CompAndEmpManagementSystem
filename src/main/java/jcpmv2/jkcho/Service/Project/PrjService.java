@@ -2,6 +2,9 @@ package jcpmv2.jkcho.Service.Project;
 
 import jcpmv2.jkcho.Domain.*;
 import jcpmv2.jkcho.Dto.*;
+import jcpmv2.jkcho.Dto.Comp.CompPrjParticiDataDto;
+import jcpmv2.jkcho.Dto.Emp.EmpTableDataDto;
+import jcpmv2.jkcho.Dto.Project.*;
 import jcpmv2.jkcho.Mapper.QsolModelMapper;
 import jcpmv2.jkcho.Repository.IcompJpaTryRepository;
 import jcpmv2.jkcho.Repository.IempJpaTryRepository;
@@ -30,14 +33,14 @@ public class PrjService {
     @Autowired
     private IempJpaTryRepository iempJpaTryRepository;
 
-    public ListDto<PrjDto> findAll(PagingDto pagingDto) {
+    public ListDto<PrjTableDataDto> findAll(PagingDto pagingDto) {
         List<PrjInfo> PrjList = iprjJpaTryRepository.findWithPagination(PageRequest.of(0 + pagingDto.getPageNo(), 10));
         Long listCount = iprjJpaTryRepository.count();
         if (PrjList.size() == 0) {
             return null;
         } else {
-            List<PrjDto> PrjListData = QsolModelMapper.map(PrjList, PrjDto.class);
-            return ListDto.<PrjDto>builder()
+            List<PrjTableDataDto> PrjListData = QsolModelMapper.map(PrjList, PrjTableDataDto.class);
+            return ListDto.<PrjTableDataDto>builder()
                     .list(PrjListData)
                     .listCount(listCount)
                     .build();
@@ -45,46 +48,46 @@ public class PrjService {
     }
 
     @Transactional
-    public ListDto<PrjDto> listConditionSearch(PrjDto prjDto) {
+    public ListDto<PrjTableDataDto> listConditionSearch(PrjConditionSearchDataDto prjConditionSearchDataDto) {
         List<PrjInfo> PrjList = null;
         Long ConditionCount = null;
-        if (prjDto.getCondition().equals("pname")) {
-            PrjList = iprjJpaTryRepository.findAllByCnameOrCbossPaging(prjDto.getItem(), PageRequest.of(0 + prjDto.getPageNo(), 10));
-            ConditionCount = iprjJpaTryRepository.conditionCountByCnameOrCboss(prjDto.getItem());
+        if (prjConditionSearchDataDto.getCondition().equals("pname")) {
+            PrjList = iprjJpaTryRepository.findAllByCnameOrCbossPaging(prjConditionSearchDataDto.getItem(), PageRequest.of(0 + prjConditionSearchDataDto.getPageNo(), 10));
+            ConditionCount = iprjJpaTryRepository.conditionCountByCnameOrCboss(prjConditionSearchDataDto.getItem());
         }
-        List<PrjDto> PrjListData = QsolModelMapper.map(PrjList, PrjDto.class);
-        return ListDto.<PrjDto>builder()
+        List<PrjTableDataDto> PrjListData = QsolModelMapper.map(PrjList, PrjTableDataDto.class);
+        return ListDto.<PrjTableDataDto>builder()
                 .list(PrjListData)
                 .listCount(ConditionCount)
                 .build();
     }
 
     @Transactional
-    public void create(PrjDto prjDto) {
+    public void create(PrjTableDataDto prjTableDataDto) {
         PrjInfo prjInfo = new PrjInfo();
-        prjInfo.setPname(prjDto.getPname());
-        prjInfo.setPcontent(prjDto.getPcontent());
-        prjInfo.setPview(prjDto.getPview());
+        prjInfo.setPname(prjTableDataDto.getPname());
+        prjInfo.setPcontent(prjTableDataDto.getPcontent());
+        prjInfo.setPview(prjTableDataDto.getPview());
         iprjJpaTryRepository.save(prjInfo);
     }
 
 
-    public ListDto<PrjDto> findPnameAndPcontent(PrjDto prjDto) {
-        List<PrjInfo> prjData = iprjJpaTryRepository.findPnameAndPcontent(prjDto.getPid());
-        List<PrjDto> PrjListData = QsolModelMapper.map(prjData, PrjDto.class);
-        return ListDto.<PrjDto>builder()
+    public ListDto<PrjTableDataDto> findPnameAndPcontent(PrjTableDataDto prjTableDataDto) {
+        List<PrjInfo> prjData = iprjJpaTryRepository.findPnameAndPcontent(prjTableDataDto.getPid());
+        List<PrjTableDataDto> PrjListData = QsolModelMapper.map(prjData, PrjTableDataDto.class);
+        return ListDto.<PrjTableDataDto>builder()
                 .list(PrjListData)
                 .build();
     }
 
-    public ListDto<CompDto> findParticipationComp(PrjDto prjDto) {
-        List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjDto.getPid(), PageRequest.of(0 + prjDto.getPageNo(), 10));
-        Long listCount = iprjParticipationCompJpaRepository.getCountData(prjDto.getPid());
+    public ListDto<CompPrjParticiDataDto> findParticipationComp(PrjIdDataDto prjIdDataDto) {
+        List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjIdDataDto.getPid(), PageRequest.of(0 + prjIdDataDto.getPageNo(), 10));
+        Long listCount = iprjParticipationCompJpaRepository.getCountData(prjIdDataDto.getPid());
         if (prjCompList.size() == 0) {
             return null;
         } else {
-            List<CompDto> prjListData = QsolModelMapper.map(prjCompList, CompDto.class);
-            return ListDto.<CompDto>builder()
+            List<CompPrjParticiDataDto> prjListData = QsolModelMapper.map(prjCompList, CompPrjParticiDataDto.class);
+            return ListDto.<CompPrjParticiDataDto>builder()
                     .list(prjListData)
                     .listCount(listCount)
                     /*.compid(PrjListData.get(0).getEcompid())*/
@@ -93,21 +96,21 @@ public class PrjService {
     }
 
     @Transactional
-    public void prjAddCompDeplicateCheck(PrjDto prjDto) {
-        Optional<PrjParticipationCompInfo> duplicateCid = iprjParticipationCompJpaRepository.findTopByCidAndPid(prjDto.getCid(), prjDto.getPid());
+    public void prjAddCompDeplicateCheck(PrjDuplicateCheckDto prjDuplicateCheckDto) {
+        Optional<PrjParticipationCompInfo> duplicateCid = iprjParticipationCompJpaRepository.findTopByCidAndPid(prjDuplicateCheckDto.getCid(), prjDuplicateCheckDto.getPid());
         if (duplicateCid.isPresent()) {
-            prjDto.setDuplicateCheck("이미 참여한 회사입니다");
+            prjDuplicateCheckDto.setDuplicateCheck("이미 참여한 회사입니다");
         }
     }
 
-    public ListDto<EmpDto> compPartiEmpSearch(PrjDto prjDto) {
-        List<IPrjParticipationEmpGetData> prjEmpList = iempJpaTryRepository.findParticipationComp(prjDto.getPid(), prjDto.getCid(), PageRequest.of(0 + prjDto.getPageNo(), 10));
-        Long listCount = iprjParticipationCompJpaRepository.getEmpCountData(prjDto.getPid(), prjDto.getCid());
+    public ListDto<EmpTableDataDto> compParticiEmpSearch(PrjIdDataDto prjIdDataDto) {
+        List<IPrjParticipationEmpGetData> prjEmpList = iempJpaTryRepository.findParticipationComp(prjIdDataDto.getPid(), prjIdDataDto.getCid(), PageRequest.of(0 + prjIdDataDto.getPageNo(), 10));
+        Long listCount = iprjParticipationCompJpaRepository.getEmpCountData(prjIdDataDto.getPid(), prjIdDataDto.getCid());
         if (prjEmpList.size() == 0) {
             return null;
         } else {
-            List<EmpDto> prjListData = QsolModelMapper.map(prjEmpList, EmpDto.class);
-            return ListDto.<EmpDto>builder()
+            List<EmpTableDataDto> prjListData = QsolModelMapper.map(prjEmpList, EmpTableDataDto.class);
+            return ListDto.<EmpTableDataDto>builder()
                     .list(prjListData)
                     .listCount(listCount)
                     /*.compid(PrjListData.get(0).getEcompid())*/
@@ -115,34 +118,34 @@ public class PrjService {
         }
     }
 
-    public void prjAddCompEmpLastStep(PrjDto prjDto) {
+    public void prjAddCompEmpLastStep(PrjAddCompEmpDataDto prjAddCompEmpDataDto) {
         int count = 0;
-        while (count < prjDto.getEid().length) {
+        while (count < prjAddCompEmpDataDto.getEid().length) {
             PrjParticipationCompInfo prjParticipationCompInfo = new PrjParticipationCompInfo();
-            prjParticipationCompInfo.setPid(prjDto.getPid());
-            prjParticipationCompInfo.setCid(prjDto.getCid());
-            prjParticipationCompInfo.setEid(prjDto.getEid()[count]);
-            prjParticipationCompInfo.setCview(prjDto.getCview());
-            prjParticipationCompInfo.setEview(prjDto.getEview());
+            prjParticipationCompInfo.setPid(prjAddCompEmpDataDto.getPid());
+            prjParticipationCompInfo.setCid(prjAddCompEmpDataDto.getCid());
+            prjParticipationCompInfo.setEid(prjAddCompEmpDataDto.getEid()[count]);
+            prjParticipationCompInfo.setCview(prjAddCompEmpDataDto.getCview());
+            prjParticipationCompInfo.setEview(prjAddCompEmpDataDto.getEview());
             iprjParticipationCompJpaRepository.save(prjParticipationCompInfo);
             count++;
         }
     }
 
-    public ListDto<PrjDto> updatePrjStep(PrjDto prjDto) {
-        List<PrjInfo> prjList = iprjJpaTryRepository.findAllByPId(prjDto.getPid());
-        List<PrjDto> prjListData = QsolModelMapper.map(prjList, PrjDto.class);
-        return  ListDto.<PrjDto>builder()
+    public ListDto<PrjTableDataDto> updatePrjStep(PrjIdDataDto prjIdDataDto) {
+        List<PrjInfo> prjList = iprjJpaTryRepository.findAllByPId(prjIdDataDto.getPid());
+        List<PrjTableDataDto> prjListData = QsolModelMapper.map(prjList, PrjTableDataDto.class);
+        return  ListDto.<PrjTableDataDto>builder()
                 .list(prjListData)
                 .build();
     }
 
     /*@Transactional*/
-    public void updatePrjTry(PrjDto prjDto) {
+    public void updatePrjTry(PrjTableDataDto prjTableDataDto) {
         // Dirty Checking 활용
-        PrjInfo prjInfo = iprjJpaTryRepository.findById(prjDto.getPid()).orElse(null);
-        prjInfo.setPname(prjDto.getPname());
-        prjInfo.setPcontent(prjDto.getPcontent());
+        PrjInfo prjInfo = iprjJpaTryRepository.findById(prjTableDataDto.getPid()).orElse(null);
+        prjInfo.setPname(prjTableDataDto.getPname());
+        prjInfo.setPcontent(prjTableDataDto.getPcontent());
     }
 
     public void unrealDelete(Long pid) {
@@ -157,21 +160,21 @@ public class PrjService {
         iprjJpaTryRepository.deleteByPid(pid);
     }
 
-    public void prjCompUnrealDelete(PrjDto prjDto) {
-        iprjParticipationCompJpaRepository.prjCompUnrealDelete(prjDto.getPid(), prjDto.getCid());
+    public void prjCompUnrealDelete(PrjTableDataDto prjTableDataDto) {
+        iprjParticipationCompJpaRepository.prjCompUnrealDelete(prjTableDataDto.getPid(), prjTableDataDto.getCid());
     }
 
     @Transactional
-    public void prjCompRealDelete(PrjDto prjDto) {
-        iprjParticipationCompJpaRepository.deleteByPidAndCid(prjDto.getPid(), prjDto.getCid());
+    public void prjCompRealDelete(PrjTableDataDto prjTableDataDto) {
+        iprjParticipationCompJpaRepository.deleteByPidAndCid(prjTableDataDto.getPid(), prjTableDataDto.getCid());
     }
 
-    public void prjEmpUnrealDelete(EmpDto empDto) {
-        iprjParticipationCompJpaRepository.prjEmpUnrealDelete(empDto.getPid(), empDto.getCid(), empDto.getEid());
+    public void prjEmpUnrealDelete(PrjEidToDeleteDataDto prjEidToDeleteDataDto) {
+        iprjParticipationCompJpaRepository.prjEmpUnrealDelete(prjEidToDeleteDataDto.getPid(), prjEidToDeleteDataDto.getCid(), prjEidToDeleteDataDto.getEid());
     }
 
     @Transactional
-    public void prjEmpRealDelete(EmpDto empDto) {
-        iprjParticipationCompJpaRepository.deleteByEid(empDto.getPid(), empDto.getCid(), empDto.getEid());
+    public void prjEmpRealDelete(PrjEidToDeleteDataDto prjEidToDeleteDataDto) {
+        iprjParticipationCompJpaRepository.deleteByEid(prjEidToDeleteDataDto.getPid(), prjEidToDeleteDataDto.getCid(), prjEidToDeleteDataDto.getEid());
     }
 }

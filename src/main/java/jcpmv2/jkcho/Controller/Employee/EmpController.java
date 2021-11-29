@@ -1,7 +1,6 @@
 package jcpmv2.jkcho.Controller.Employee;
 
-import jcpmv2.jkcho.Dto.CompDto;
-import jcpmv2.jkcho.Dto.EmpDto;
+import jcpmv2.jkcho.Dto.Emp.*;
 import jcpmv2.jkcho.Dto.ListDto;
 import jcpmv2.jkcho.Service.Employee.EmpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +18,20 @@ public class EmpController {
 
     /*--------------------------------------SELECT--------------------------------------*/
     @PostMapping()
-    public ResponseEntity<ListDto<EmpDto>> findAllByEcompidOrderByEnamePaging(@RequestBody @Valid EmpDto empDto) {/*SearchingDto searchingDto*/
-        return ResponseEntity.ok(empService.findAllByEcompidOrderByEnamePaging(empDto));/*searchingDto*/
+    public ResponseEntity<ListDto<EmpTableDataDto>> findAllByEcompidOrderByEnamePaging(@RequestBody @Valid EmpListSearchDataDto empListSearchDataDto) {/*SearchingDto searchingDto*/
+        return ResponseEntity.ok(empService.findAllByEcompidOrderByEnamePaging(empListSearchDataDto));/*searchingDto*/
     }
 
     @PostMapping("/emplistConditionSearch")
-    public ResponseEntity<ListDto<EmpDto>> emplistConditionSearch(@RequestBody @Valid EmpDto empDto) {
-        return ResponseEntity.ok(empService.emplistConditionSearch(empDto));
+    public ResponseEntity<ListDto<EmpTableDataDto>> emplistConditionSearch(@RequestBody @Valid EmpConditionSearchDataDto empConditionSearchDataDto) {
+        return ResponseEntity.ok(empService.emplistConditionSearch(empConditionSearchDataDto));
     }
 
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping("/create")
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid EmpDto empDto) {
-        empService.create(empDto);
-        if(empDto.getEname().equals("중복된 사원입니다(이름과 이메일이 중복)")) {
+    public ResponseEntity<HttpStatus> create(@RequestBody @Valid EmpCidGotViewDataDto empCidGotViewDataDto) {
+        empService.create(empCidGotViewDataDto);
+        if(empCidGotViewDataDto.getEname().equals("중복된 사원입니다(이름과 이메일이 중복)")) {
             return new ResponseEntity("중복된 사원입니다(이름과 이메일이 중복)", HttpStatus.OK);
         } else {
             return ResponseEntity.ok().build();
@@ -41,13 +40,13 @@ public class EmpController {
 
     /*--------------------------------------UPDATE--------------------------------------*/
     @GetMapping("/updateStep/{eid}")
-    public ResponseEntity<ListDto<EmpDto>> findAll(EmpDto empDto){
-        return ResponseEntity.ok(empService.empUpdateReady(empDto));
+    public ResponseEntity<ListDto<EmpTableDataDto>> findAll(EmpTableDataDto empTableDataDto){
+        return ResponseEntity.ok(empService.empUpdateReady(empTableDataDto));
     }
 
     @PutMapping()
-    public ResponseEntity<HttpStatus> update(@RequestBody @Valid EmpDto empDto) {
-        empService.empUpdateDirtyChecking(empDto);
+    public ResponseEntity<HttpStatus> update(@RequestBody @Valid EmpTableDataDto empTableDataDto) {
+        empService.update(empTableDataDto);
         return ResponseEntity.ok().build();
     }
     /*--------------------------------------DELETE--------------------------------------*/

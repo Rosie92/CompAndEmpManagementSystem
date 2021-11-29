@@ -1,6 +1,9 @@
 package jcpmv2.jkcho.Controller.Project;
 
 import jcpmv2.jkcho.Dto.*;
+import jcpmv2.jkcho.Dto.Comp.CompPrjParticiDataDto;
+import jcpmv2.jkcho.Dto.Emp.EmpTableDataDto;
+import jcpmv2.jkcho.Dto.Project.*;
 import jcpmv2.jkcho.Service.Project.PrjService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,73 +22,73 @@ public class prjController {
 
     /*--------------------------------------SELECT--------------------------------------*/
     @GetMapping("/{pageNo}")
-    public ResponseEntity<ListDto<PrjDto>> findAll(PagingDto pagingDto) {
+    public ResponseEntity<ListDto<PrjTableDataDto>> findAll(PagingDto pagingDto) {
         return ResponseEntity.ok(prjService.findAll(pagingDto));
     }
 
     @PostMapping("/listConditionSearch")
-    public ResponseEntity<ListDto<PrjDto>> listConditionSearch(@RequestBody @Valid PrjDto prjDto) {
-        return ResponseEntity.ok(prjService.listConditionSearch(prjDto));
+    public ResponseEntity<ListDto<PrjTableDataDto>> listConditionSearch(@RequestBody @Valid PrjConditionSearchDataDto prjConditionSearchDataDto) {
+        return ResponseEntity.ok(prjService.listConditionSearch(prjConditionSearchDataDto));
     }
 
     @PostMapping("/{pid}")
-    public ResponseEntity<ListDto<PrjDto>> findPnameAndPcontent(@Valid PrjDto prjDto) {
+    public ResponseEntity<ListDto<PrjTableDataDto>> findPnameAndPcontent(@Valid PrjTableDataDto prjTableDataDto) {
         /*
         오류 해결을 위하여 @RequestBody 삭제
         Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
         */
-        return ResponseEntity.ok(prjService.findPnameAndPcontent(prjDto));
+        return ResponseEntity.ok(prjService.findPnameAndPcontent(prjTableDataDto));
     }
 
     @PostMapping("/participationCompSearch")
-    public ResponseEntity<ListDto<CompDto>> findParticipationComp(@RequestBody @Valid PrjDto prjDto) {
+    public ResponseEntity<ListDto<CompPrjParticiDataDto>> findParticipationComp(@RequestBody @Valid PrjIdDataDto prjIdDataDto) {
         /*
         오류 해결을 위하여 @RequestBody 삭제
         Content type 'application/x-www-form-urlencoded;charset=UTF-8' not supported
         */
-        return ResponseEntity.ok(prjService.findParticipationComp(prjDto));
+        return ResponseEntity.ok(prjService.findParticipationComp(prjIdDataDto));
     }
 
-    @PostMapping("/compPartiEmpSearch")
-    public ResponseEntity<ListDto<EmpDto>> compPartiEmpSearch(@RequestBody @Valid PrjDto prjDto) {
-        return ResponseEntity.ok(prjService.compPartiEmpSearch(prjDto));
+    @PostMapping("/compParticiEmpSearch")
+    public ResponseEntity<ListDto<EmpTableDataDto>> compParticiEmpSearch(@RequestBody @Valid PrjIdDataDto prjIdDataDto) {
+        return ResponseEntity.ok(prjService.compParticiEmpSearch(prjIdDataDto));
     }
 
     @PostMapping("/prjAddCompDeplicateCheck")
-    public ResponseEntity<HttpStatus> prjAddCompDeplicateCheck(@RequestBody @Valid PrjDto prjDto) {
-        prjService.prjAddCompDeplicateCheck(prjDto);
-        if(prjDto.getDuplicateCheck().equals("이미 참여한 회사입니다")) {
+    public ResponseEntity<HttpStatus> prjAddCompDeplicateCheck(@RequestBody @Valid PrjDuplicateCheckDto prjDuplicateCheckDto) {
+        prjService.prjAddCompDeplicateCheck(prjDuplicateCheckDto);
+        if(prjDuplicateCheckDto.getDuplicateCheck().equals("이미 참여한 회사입니다")) {
             return new ResponseEntity("이미 참여한 회사입니다", HttpStatus.OK);
         }
         return ResponseEntity.ok().build();
     }
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
-    public ResponseEntity<HttpStatus> create(@RequestBody @Valid PrjDto prjDto) {
-        if (prjDto.getPname().equals("")) {
+    public ResponseEntity<HttpStatus> create(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
+        if (prjTableDataDto.getPname().equals("")) {
             throw new NullPointerException();
-        } else if (prjDto.getPcontent().equals("")) {
+        } else if (prjTableDataDto.getPcontent().equals("")) {
             throw new NullPointerException();
         }
-        prjService.create(prjDto);
+        prjService.create(prjTableDataDto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/prjAddCompEmpLastStep")
-    public ResponseEntity<HttpStatus> prjAddCompEmpLastStep(@RequestBody @Valid PrjDto prjDto) {
-        prjService.prjAddCompEmpLastStep(prjDto);
+    public ResponseEntity<HttpStatus> prjAddCompEmpLastStep(@RequestBody @Valid PrjAddCompEmpDataDto prjAddCompEmpDataDto) {
+        prjService.prjAddCompEmpLastStep(prjAddCompEmpDataDto);
         return ResponseEntity.ok().build();
     }
 
     /*--------------------------------------UPDATE--------------------------------------*/
     @GetMapping("/update/{pid}")
-    public ResponseEntity<ListDto<PrjDto>> updatePrjStep(PrjDto prjDto) {
-        return ResponseEntity.ok(prjService.updatePrjStep(prjDto));
+    public ResponseEntity<ListDto<PrjTableDataDto>> updatePrjStep(PrjIdDataDto prjIdDataDto) {
+        return ResponseEntity.ok(prjService.updatePrjStep(prjIdDataDto));
     }
 
     @PutMapping()
-    public ResponseEntity<HttpStatus> updatePrjTry(@RequestBody @Valid PrjDto prjDto) {
-        prjService.updatePrjTry(prjDto);
+    public ResponseEntity<HttpStatus> updatePrjTry(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
+        prjService.updatePrjTry(prjTableDataDto);
         return ResponseEntity.ok().build();
     }
 
@@ -103,26 +106,26 @@ public class prjController {
     }
 
     @PutMapping("/prjCompUnrealDelete")
-    public ResponseEntity<HttpStatus> prjCompUnrealDelete(@RequestBody @Valid PrjDto prjDto) {
-        prjService.prjCompUnrealDelete(prjDto);
+    public ResponseEntity<HttpStatus> prjCompUnrealDelete(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
+        prjService.prjCompUnrealDelete(prjTableDataDto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/prjCompRealDelete")
-    public ResponseEntity<HttpStatus> prjCompRealDelete(@RequestBody @Valid PrjDto prjDto) {
-        prjService.prjCompRealDelete(prjDto);
+    public ResponseEntity<HttpStatus> prjCompRealDelete(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
+        prjService.prjCompRealDelete(prjTableDataDto);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/prjEmpUnrealDelete")
-    public ResponseEntity<HttpStatus> prjEmpUnrealDelete(@RequestBody @Valid EmpDto empDto) {
-        prjService.prjEmpUnrealDelete(empDto);
+    public ResponseEntity<HttpStatus> prjEmpUnrealDelete(@RequestBody @Valid PrjEidToDeleteDataDto prjEidToDeleteDataDto) {
+        prjService.prjEmpUnrealDelete(prjEidToDeleteDataDto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/prjEmpRealDelete")
-    public ResponseEntity<HttpStatus> prjEmpRealDelete(@RequestBody @Valid EmpDto empDto) {
-        prjService.prjEmpRealDelete(empDto);
+    public ResponseEntity<HttpStatus> prjEmpRealDelete(@RequestBody @Valid PrjEidToDeleteDataDto prjEidToDeleteDataDto) {
+        prjService.prjEmpRealDelete(prjEidToDeleteDataDto);
         return ResponseEntity.ok().build();
     }
 }
