@@ -63,16 +63,16 @@
                             <div>
                                 <el-form ref="form" :model="pageData.compUpdateData" style="margin-left: 20px;">
                                     <el-form-item label="회사명" style="display: inline-block;">
-                                        <el-input v-model="pageData.compUpdateData.cname" style="width: 350px;" maxlength="15"></el-input>
+                                        <el-input v-model="pageData.compUpdateData.cname" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="대표자명" style="display: inline-block;">
-                                        <el-input v-model="pageData.compUpdateData.cboss" style="width: 350px;" maxlength="10"></el-input>
+                                        <el-input v-model="pageData.compUpdateData.cboss" style="width: 350px;" maxlength="10" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="대표전화" style="display: inline-block;">
-                                        <el-input v-model="pageData.compUpdateData.ccall" style="width: 350px;" maxlength="10"></el-input>
+                                        <el-input v-model="pageData.compUpdateData.ccall" style="width: 350px;" maxlength="10" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="법인번호" style="display: inline-block;">
-                                        <el-input v-model="pageData.compUpdateData.cnumber" style="width: 350px;" maxlength="20"></el-input>
+                                        <el-input v-model="pageData.compUpdateData.cnumber" style="width: 350px;" maxlength="20" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </div>
@@ -175,19 +175,19 @@
                                 <div>
                                     <el-form ref="form" :model="pageData.createEmpInfo" style="margin-left: 20px;">
                                         <el-form-item label="이름" style="display: inline-block;">
-                                            <el-input v-model="pageData.createEmpInfo.ename" style="width: 350px;" maxlength="10"></el-input>
+                                            <el-input v-model="pageData.createEmpInfo.ename" style="width: 350px;" maxlength="10" onkeyup="checkSpacebar(this)"></el-input>
                                         </el-form-item>
                                         <el-form-item label="이메일" style="display: inline-block;">
-                                            <el-input v-model="pageData.createEmpInfo.eemail" style="width: 350px;" maxlength="20"></el-input>
+                                            <el-input v-model="pageData.createEmpInfo.eemail" style="width: 350px;" maxlength="20" onkeyup="checkSpacebar(this)"></el-input>
                                         </el-form-item>
                                         <el-form-item label="휴대폰" style="display: inline-block;">
-                                            <el-input v-model="pageData.createEmpInfo.ephone" style="width: 350px;" maxlength="15"></el-input>
+                                            <el-input v-model="pageData.createEmpInfo.ephone" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                         </el-form-item>
                                         <el-form-item label="소속" style="display: inline-block;">
-                                            <el-input v-model="pageData.createEmpInfo.eposition" style="width: 350px;" maxlength="15"></el-input>
+                                            <el-input v-model="pageData.createEmpInfo.eposition" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                         </el-form-item>
                                         <el-form-item label="직급" style="display: inline-block;">
-                                            <el-input v-model="pageData.createEmpInfo.eaffiliation" style="width: 350px;" maxlength="15"></el-input>
+                                            <el-input v-model="pageData.createEmpInfo.eaffiliation" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                         </el-form-item>
                                     </el-form>
                                 </div>
@@ -198,7 +198,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
+                        <button @click="itemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
                     </div>
                 </div>
             </div>
@@ -217,19 +217,19 @@
                             <div>
                                 <el-form ref="form" :model="pageData.empUpdateData" style="margin-left: 20px;">
                                     <el-form-item label="이름" style="display: inline-block;">
-                                        <el-input v-model="pageData.empUpdateData.ename" style="width: 350px;" maxlength="10"></el-input>
+                                        <el-input v-model="pageData.empUpdateData.ename" style="width: 350px;" maxlength="10" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="이메일" style="display: inline-block;">
-                                        <el-input v-model="pageData.empUpdateData.eemail" style="width: 350px;" maxlength="20"></el-input>
+                                        <el-input v-model="pageData.empUpdateData.eemail" style="width: 350px;" maxlength="20" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="휴대폰" style="display: inline-block;">
-                                        <el-input v-model="pageData.empUpdateData.ephone" style="width: 350px;" maxlength="15"></el-input>
+                                        <el-input v-model="pageData.empUpdateData.ephone" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="소속" style="display: inline-block;">
-                                        <el-input v-model="pageData.empUpdateData.eposition" style="width: 350px;" maxlength="15"></el-input>
+                                        <el-input v-model="pageData.empUpdateData.eposition" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="직급" style="display: inline-block;">
-                                        <el-input v-model="pageData.empUpdateData.eaffiliation" style="width: 350px;" maxlength="15"></el-input>
+                                        <el-input v-model="pageData.empUpdateData.eaffiliation" style="width: 350px;" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                 </el-form>
                             </div>
@@ -249,6 +249,15 @@
 </div>
 <th:block layout:fragment="scriptBeforeCreateVue">
     <script>
+        function checkSpacebar(obj) {
+            if(obj.value == " ") {
+                alert("첫 시작을 공백으로 할 수 없습니다. 공백을 제거합니다.");
+                obj.focus();
+                obj.value = obj.value.replace(' ','');
+                return false;
+            }
+        }
+
         let localData = {
             listData: {},
             empListData: [],
@@ -301,6 +310,9 @@
         let localMethod = {
             moveCreate: function() {
                 location.href = "/view/Company/CompCreate";
+            },
+            itemClean: function() {
+                this.pageData.createEmpInfo = {}
             },
             // --------------------------------- COMP ---------------------------------
             list: function () {
@@ -465,12 +477,9 @@
                 axiosPost("/api/employee/empController/create", vueApp.pageData.createEmpInfo,
                     function (response) {
                         if (response.data === "중복된 사원입니다(이름과 이메일이 중복)") {
-                            vueApp.pageData.createEmpInfo.ename = '';
-                            vueApp.pageData.createEmpInfo.eemail = '';
-                            vueApp.pageData.createEmpInfo.ephone = '';
-                            vueApp.pageData.createEmpInfo.eposition = '';
-                            vueApp.pageData.createEmpInfo.eaffiliation = '';
                             alert("중복된 사원입니다(이름과 이메일이 중복)");
+                        } else if (response.data === "공백 제거 후 ' '상태") {
+                            alert("직원 이름은 필수 항목입니다.");
                         } else {
                             alert("등록 성공");
                             vueApp.pageData.createEmpInfo = {}; // 다시 직원 생성을 눌렀을 때 input 값이 채워져 있는 것을 방지하기위해 데이터 비워주기
@@ -480,8 +489,16 @@
                         }
                     },
                     function (error) {
-                        console.log(error.response);
-                        alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        if(error.response.data.errorMessages[0] == "could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement"){
+                            console.log(error.response);
+                            alert("직원 이름은 필수 항목입니다.")
+                        } else if (error.response.data.errorMessages[0] == null) {
+                            console.log(error.response);
+                            alert("직원 이름은 필수 항목입니다.")
+                        } else {
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        }
                     }
                 );
             },

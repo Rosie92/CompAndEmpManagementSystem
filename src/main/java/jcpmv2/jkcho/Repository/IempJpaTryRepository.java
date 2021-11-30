@@ -23,7 +23,6 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
             "(select t.eid from PrjParticipationCompInfo t where t.cid=?2 and t.pid=?1) group by e.eid order by e.ename")
     List<IPrjParticipationEmpGetData> findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(Long pid, Long cid);
 
-    Optional<EmpInfo> findByEnameAndEphone(String ename, String ephone);
 
     @Modifying // Not supported for DML operations 에러 발생 시 해결 방법
     @Query(value = "update EmpInfo e set e.eview=false where e.eid=?1")
@@ -62,4 +61,5 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
             "t.eview=true ORDER BY e.ename")
     List<IPrjParticipationEmpGetData> findParticipationComp(Long pid, Long cid, PageRequest of);
 
+    Optional<EmpInfo> findByEnameAndEphoneAndEcompid(String ename, String ephone, Long searchCompid);
 }

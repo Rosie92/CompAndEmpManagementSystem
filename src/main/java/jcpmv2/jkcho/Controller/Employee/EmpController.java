@@ -30,6 +30,9 @@ public class EmpController {
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping("/create")
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid EmpCidGotViewDataDto empCidGotViewDataDto) {
+        if(empCidGotViewDataDto.getEname().equals(" ") || empCidGotViewDataDto.getEname().equals("") ) {
+            return new ResponseEntity("공백 제거 후 ' '상태", HttpStatus.OK);
+        }
         empService.create(empCidGotViewDataDto);
         if(empCidGotViewDataDto.getEname().equals("중복된 사원입니다(이름과 이메일이 중복)")) {
             return new ResponseEntity("중복된 사원입니다(이름과 이메일이 중복)", HttpStatus.OK);

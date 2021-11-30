@@ -102,8 +102,8 @@ public class EmpService {
 
     @Transactional
     public void create(EmpCidGotViewDataDto empCidGotViewDataDto) {
-        Optional<EmpInfo> duplicateCname = iempJpaTryRepository.findByEnameAndEphone(empCidGotViewDataDto.getEname(), empCidGotViewDataDto.getEphone());
-        if (duplicateCname.isPresent()) {
+        Optional<EmpInfo> duplicateCheck = iempJpaTryRepository.findByEnameAndEphoneAndEcompid(empCidGotViewDataDto.getEname(), empCidGotViewDataDto.getEphone(), empCidGotViewDataDto.getSearchCompid());
+        if (duplicateCheck.isPresent()) {
             empCidGotViewDataDto.setEname("중복된 사원입니다(이름과 이메일이 중복)");
         } else {
             EmpInfo empInfo = new EmpInfo();
