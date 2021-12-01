@@ -34,7 +34,7 @@
                         <el-option v-for="item in pageData.listCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                     </el-select>
                     <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
-                    <el-button @click="list">검색</el-button>
+                    <el-button @click="projectListPageNoReset">검색</el-button>
                     <el-button @click="moveCreate">프로젝트등록</el-button>
                 </el-row>
             </el-form-item>
@@ -141,7 +141,7 @@
                                             <el-option v-for="item in pageData.compListCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                                         </el-select>
                                         <el-input v-model="pageData.compListConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
-                                        <el-button @click="compList">검색</el-button>
+                                        <el-button @click="compPDataPageNoReset">검색</el-button>
                                     </el-row>
                                 </el-form-item>
                             </el-form>
@@ -260,10 +260,10 @@
                             <div>
                                 <el-form ref="form" :model="pageData.updateListData">
                                     <el-form-item label="프로젝트명">
-                                        <el-input v-model="pageData.updateListData.pname" maxlength="15"></el-input>
+                                        <el-input v-model="pageData.updateListData.pname" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     <el-form-item label="프로젝트내용">
-                                        <el-input type="textarea" v-model="pageData.updateListData.pcontent" maxlength="200"></el-input>
+                                        <el-input type="textarea" v-model="pageData.updateListData.pcontent" maxlength="200" onkeyup="checkSpacebar(this)"></el-input>
                                     </el-form-item>
                                     </el-form-item>
                                 </el-form>
@@ -283,6 +283,15 @@
 </div>
 <th:block layout:fragment="scriptBeforeCreateVue">
     <script>
+        function checkSpacebar(obj) {
+            if(obj.value == " ") {
+                alert("첫 시작을 공백으로 할 수 없습니다. 공백을 제거합니다.");
+                obj.focus();
+                obj.value = obj.value.replace(' ','');
+                return false;
+            }
+        }
+
         let localData = {
             listData: {},
             updateListData: {},
@@ -338,12 +347,22 @@
             },
             itemClean: function () { // 회사 조건 검색 item
                 this.pageData.compListConditionSearchData.item = '';
+                this.pageData.dataDeliveryArea.switch = "";
+                this.pageData.compPData.pageNo = 1;
             },
             prjInCompPDataPageNoReset: function () {
                 this.pageData.prjInCompPData.pageNo = 1;
             },
             empPDataPageNoReset: function () {
                 this.pageData.empPData.pageNo = 1;
+            },
+            projectListPageNoReset: function () {
+                this.pageData.pData.pageNo = 1;
+                this.list();
+            },
+            compPDataPageNoReset: function () {
+                this.pageData.compPData.pageNo = 1;
+                this.compList();
             },
             list: function () { // 등록된 프로젝트 목록
                 if (this.pageData.listConditionSearchData.item == '') {
@@ -368,7 +387,6 @@
                             vueApp.pageData.listData = [];
                             vueApp.pageData.listData = response.data.list;
                             vueApp.pageData.pData.listCount = response.data.listCount / 2;
-                            vueApp.pageData.pData.pageNo = 1;
                             console.log("listConditionSearch실행완료")
                         },
                         function (error) {
@@ -408,7 +426,7 @@
                 axiosPost("/api/project/prjController/participationCompSearch", vueApp.pageData.dataDeliveryArea,
                     function (response) {
                         vueApp.pageData.prjParticipationComp = response.data.list;
-                        vueApp.pageData.prjInCompPData.listCount = response.data.listCount / 4;
+                        vueApp.pageData.prjInCompPData.listCount = response.data.listCount2 / 2;
                         let i = 0;
                         while(i < vueApp.pageData.prjParticipationComp.length) {
                             vueApp.pageData.prjParticipationComp[i].count = vueApp.pageData.prjParticipationComp[i].count;
@@ -451,12 +469,16 @@
                             vueApp.pageData.compListData = [];
                             vueApp.pageData.compListData = response.data.list;
                             vueApp.pageData.compPData.listCount = response.data.listCount / 2;
-                            vueApp.pageData.compPData.pageNo = 1;
                             $('#compAddPrj').modal('show')
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if(error.response.data.errorMessages[0] == null) {
+                                console.log(error.response);
+                                alert("조건을 선택하세요")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 }
@@ -514,9 +536,7 @@
             },
             prjAddCompEmpLastStep: function () { // 프로젝트 참가에서 선택된 회사와 체크된 직원들을 DB에 등록하는 마지막 과정
                 let count = 0;
-                if(this.pageData.dataDeliveryArea.eid == "") {
-                    this.pageData.dataDeliveryArea.eid = [];
-                }
+                this.pageData.dataDeliveryArea.eid = [];
                 while(count < this.pageData.multipleSelection.length) {
                     this.pageData.dataDeliveryArea.eid[count] = this.pageData.multipleSelection[count].eid;
                     count++;
@@ -537,7 +557,7 @@
                                 $('#prjShow').modal('show')
                                 vueApp.compEmpShow(vueApp.pageData.dataDeliveryArea.cid); // 추가된 직원 표시를 위해 새로고침
                                 $('#compEmpShow').modal('show')
-                                vueApp.pageData.dataDeliveryArea.switch == "";
+                                vueApp.pageData.dataDeliveryArea.switch = "";
                             } else {
                                 alert("참여가 완료되었습니다");
                                 $('#prjCompAddEmpCheck').modal('hide')
@@ -603,7 +623,10 @@
                     function (response) {
                         vueApp.pageData.updateListData = response.data.list[0];
                         vueApp.pageData.updateListData.pid = pid;
-
+                    },
+                    function (error) {
+                        console.log(error.response);
+                        alert("에러메시지 : " + error.response.data.errorMessages[0])
                     }
                 )
             },
@@ -613,6 +636,15 @@
                         alert("프로젝트 수정이 완료되었습니다")
                         $('#updatePrj').modal('hide')
                         vueApp.list();
+                    },
+                    function (error) {
+                        if(error.response.data.errorMessages[0] == null) {
+                            console.log(error.response);
+                            alert("프로젝트 명은 필수 입력 항목입니다.")
+                        } else {
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        }
                     }
                 )
             },

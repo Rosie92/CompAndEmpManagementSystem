@@ -8,10 +8,10 @@
             <h1>프로젝트 신규 등록</h1>
             <el-form ref="form" :model="pageData.createPrj">
                 <el-form-item label="프로젝트명">
-                    <el-input v-model="pageData.createPrj.pname" maxlength="15"></el-input>
+                    <el-input v-model="pageData.createPrj.pname" maxlength="15" onkeyup="checkSpacebar(this)"></el-input>
                 </el-form-item>
                 <el-form-item label="프로젝트내용">
-                    <el-input type="textarea" v-model="pageData.createPrj.pcontent" maxlength="200"></el-input>
+                    <el-input type="textarea" v-model="pageData.createPrj.pcontent" maxlength="200" onkeyup="checkSpacebar(this)"></el-input>
                 </el-form-item>
                 </el-form-item>
             </el-form>
@@ -24,10 +24,19 @@
 </div>
 <th:block layout:fragment="scriptBeforeCreateVue">
     <script>
+        function checkSpacebar(obj) {
+            if(obj.value == " ") {
+                alert("첫 시작을 공백으로 할 수 없습니다. 공백을 제거합니다.");
+                obj.focus();
+                obj.value = obj.value.replace(' ','');
+                return false;
+            }
+        }
+
         let localData = {
             createPrj: {
-                pname: "",
-                pcontent: "",
+                pname: '',
+                pcontent: '',
                 pview: true
             }
         }
@@ -43,8 +52,13 @@
                         location.href = "/view/Project/PrjCreate";
                     },
                     function (error) {
-                        console.log(error.response);
-                        alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        if(error.response.data.errorMessages[0] == null) {
+                            console.log(error.response);
+                            alert("프로젝트 명은 필수 입력 항목입니다.")
+                        } else {
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        }
                     }
                 );
             }

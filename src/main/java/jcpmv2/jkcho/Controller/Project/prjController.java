@@ -65,9 +65,7 @@ public class prjController {
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
-        if (prjTableDataDto.getPname().equals("")) {
-            throw new NullPointerException();
-        } else if (prjTableDataDto.getPcontent().equals("")) {
+        if (prjTableDataDto.getPname().equals("") || prjTableDataDto.getPname().equals(" ")) {
             throw new NullPointerException();
         }
         prjService.create(prjTableDataDto);
@@ -88,6 +86,9 @@ public class prjController {
 
     @PutMapping()
     public ResponseEntity<HttpStatus> updatePrjTry(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
+        if(prjTableDataDto.getPname().equals("") || prjTableDataDto.getPname().equals(" ")) {
+            throw new NullPointerException();
+        }
         prjService.updatePrjTry(prjTableDataDto);
         return ResponseEntity.ok().build();
     }

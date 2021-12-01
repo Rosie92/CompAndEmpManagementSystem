@@ -23,6 +23,9 @@ public class CompController {
 
     @PostMapping("/listConditionSearch")
     public ResponseEntity<ListDto<CompTableDataDto>> listConditionSearch(@RequestBody @Valid CompConditionSearchDataDto compConditionSearchDataDto) {
+        if (compConditionSearchDataDto.getCondition() == null) {
+            throw new NullPointerException();
+        }
         return ResponseEntity.ok(compService.listConditionSearch(compConditionSearchDataDto));
     }
 
