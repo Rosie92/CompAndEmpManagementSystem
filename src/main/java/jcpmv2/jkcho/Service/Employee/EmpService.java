@@ -33,7 +33,7 @@ public class EmpService {
             EmpList = iempJpaTryRepository.findAllBySearchCompidOrderByEnamePagingOff(empListSearchDataDto.getSearchCompid());
         } else {
             EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePaging(empListSearchDataDto.getSearchCompid(), PageRequest.of(0 + empListSearchDataDto.getPageNo(), 10));/*searchingDto*/
-            empListCount = iempJpaTryRepository.count();
+            empListCount = iempJpaTryRepository.defaultEmpListCount(empListSearchDataDto.getSearchCompid());
             /*int count = 0;     query where eview=true 로 대체
             int q = 0;
             while(q < EmpList.size()) {
@@ -79,19 +79,19 @@ public class EmpService {
         Long count = null;
         if (empConditionSearchDataDto.getCondition().equals("ename")) {
             EmpList = iempJpaTryRepository.findAllByEname(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEname(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEname(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eemail")) {
             EmpList = iempJpaTryRepository.findAllByEemail(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEemail(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEemail(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("ephone")) {
             EmpList = iempJpaTryRepository.findAllByEphone(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEphone(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEphone(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eposition")) {
             EmpList = iempJpaTryRepository.findAllByEposition(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEposition(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEposition(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eaffiliation")) {
             EmpList = iempJpaTryRepository.findAllByEaffiliation(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEaffiliation(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEaffiliation(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         }
         List<EmpTableDataDto> EmpListData = QsolModelMapper.map(EmpList, EmpTableDataDto.class);
         return ListDto.<EmpTableDataDto>builder()

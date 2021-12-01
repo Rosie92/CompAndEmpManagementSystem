@@ -49,10 +49,10 @@
 
         let localMethod = {
             create: function() {
-                if(this.pageData.createComp.cname ==="" || this.pageData.createComp.cname ===" " ||
-                    this.pageData.createComp.cboss ==="" || this.pageData.createComp.cboss ===" " ||
-                    this.pageData.createComp.ccall ==="" || this.pageData.createComp.ccall ===" " ||
-                    this.pageData.createComp.cnumber ==="" || this.pageData.createComp.cnumber ===" ") {
+                if(this.pageData.createComp.cname === "" || this.pageData.createComp.cname === " " ||
+                    this.pageData.createComp.cboss === "" || this.pageData.createComp.cboss === " " ||
+                    this.pageData.createComp.ccall === "" || this.pageData.createComp.ccall === " " ||
+                    this.pageData.createComp.cnumber === "" || this.pageData.createComp.cnumber === " ") {
                     alert("입력되지 않은 항목이 있습니다. 모든 정보를 입력해주세요.")
                     return false;
                 }

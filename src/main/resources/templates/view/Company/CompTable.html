@@ -44,7 +44,7 @@
                         <el-option v-for="item in pageData.listCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                     </el-select>
                     <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
-                    <el-button @click="list">검색</el-button>
+                    <el-button @click="listPageNoReset">검색</el-button>
                     <el-button @click="moveCreate">회사등록</el-button>
                 </el-row>
             </el-form-item>
@@ -148,7 +148,7 @@
                                         <el-option v-for="item in pageData.emplistCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                                     </el-select>
                                     <el-input v-model="pageData.emplistConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
-                                    <el-button @click="empList">검색</el-button>
+                                    <el-button @click="empListPageNoReset">검색</el-button>
                                 </el-row>
                             </el-form-item>
                         </el-form>
@@ -288,9 +288,11 @@
             },
             empUpdateData: {},
             listConditionSearchData: {
+                condition: '',
                 item: ''
             },
             emplistConditionSearchData: {
+                condition: '',
                 item: ''
             },
             listCondition: [
@@ -313,6 +315,14 @@
             },
             itemClean: function() {
                 this.pageData.createEmpInfo = {}
+            },
+            listPageNoReset: function() {
+                this.pageData.pData.pageNo = 1;
+                this.list();
+            },
+            empListPageNoReset: function() {
+                this.pageData.empPData.pageNo = 1;
+                this.empList();
             },
             // --------------------------------- COMP ---------------------------------
             list: function () {
@@ -337,13 +347,16 @@
                     )
                 } else {
                     // 조건 리스트 조회
+                    if(this.pageData.listConditionSearchData.condition == '') {
+                        alert("조건을 선택하세요.")
+                        return false;
+                    }
                     this.pageData.listConditionSearchData.pageNo = this.pageData.pData.pageNo - 1;
                     axiosPost("/api/company/compController/listConditionSearch", vueApp.pageData.listConditionSearchData,
                         function (response) {
                             vueApp.pageData.listData = [];
                             vueApp.pageData.listData = response.data.list;
                             vueApp.pageData.pData.listCount = response.data.listCount / 2;
-                            vueApp.pageData.pData.pageNo = 1;
                             console.log("listConditionSearch실행완료")
                         },
                         function (error) {
@@ -371,6 +384,13 @@
                 )
             },
             compUpdateStep2: function () {
+                if(this.pageData.compUpdateData.cname === "" || this.pageData.compUpdateData.cname === " " ||
+                    this.pageData.compUpdateData.cboss === "" || this.pageData.compUpdateData.cboss === " " ||
+                    this.pageData.compUpdateData.ccall === "" || this.pageData.compUpdateData.ccall === " " ||
+                    this.pageData.compUpdateData.cnumber === "" || this.pageData.compUpdateData.cnumber === " ") {
+                    alert("입력되지 않은 항목이 있습니다. 모든 정보를 입력해주세요.")
+                    return false;
+                }
                 axiosPut("/api/company/compController", vueApp.pageData.compUpdateData,
                     function () {
                         alert("업데이트 성공");
@@ -428,7 +448,7 @@
                     axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
                         function (response) {
                             vueApp.pageData.empListData = response.data.list;
-                            vueApp.pageData.empPData.empListCount = response.data.empListCount / 4;
+                            vueApp.pageData.empPData.empListCount = response.data.empListCount / 2;
                             $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
                         },
                         function (error) {
@@ -443,14 +463,17 @@
                     )
                 } else {
                     // 조건 리스트 조회
+                    if(this.pageData.emplistConditionSearchData.condition == '') {
+                        alert("조건을 선택하세요.")
+                        return false;
+                    }
                     this.pageData.emplistConditionSearchData.searchCompid = vueApp.pageData.searchCompid.searchCompid
                     this.pageData.emplistConditionSearchData.pageNo = this.pageData.empPData.pageNo -1;
                     axiosPost("/api/employee/empController/emplistConditionSearch", vueApp.pageData.emplistConditionSearchData,
                         function (response) {
                             /*vueApp.pageData.empListData = [];*/
                             vueApp.pageData.empListData = response.data.list;
-                            vueApp.pageData.empPData.empListCount = response.data.empListCount / 4;
-                            vueApp.pageData.empPData.pageNo = 1;
+                            vueApp.pageData.empPData.empListCount = response.data.empListCount / 2;
                             console.log("emplistConditionSearch실행완료")
                             $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
                         },
@@ -515,6 +538,10 @@
                 )
             },
             empUpdateStep2: function (){
+                if (this.pageData.empUpdateData.ename == "" || this.pageData.empUpdateData.ename == " ") {
+                    alert("직원 이름은 필수 항목입니다.")
+                    return false;
+                }
                 axiosPut("/api/employee/empController", vueApp.pageData.empUpdateData,
                     function (response) {
                         alert("업데이트 성공");
