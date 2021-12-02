@@ -40,4 +40,7 @@ public interface IprjParticipationCompJpaRepository extends JpaRepository<PrjPar
 
     @Query(value = "select count(t.cid) from PrjParticipationCompInfo t where t.pid=?1 and t.cview=true group by t.cid")
     List<IPrjInCompCountListData> getCountData(Long pid);
+
+    @Query(value = "select count(t.eid) from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2")
+    Long empListCountParticiRemove(Long pid, Long cid);
 }

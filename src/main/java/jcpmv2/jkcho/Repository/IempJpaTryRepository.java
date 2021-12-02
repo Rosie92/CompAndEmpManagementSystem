@@ -21,7 +21,7 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     @Query(value = "select e.eid as eid, e.ename as ename, e.eemail as eemail, e.ephone as ephone, e.eposition as eposition, e.eaffiliation as eaffiliation from " +
             "PrjParticipationCompInfo t join EmpInfo e on e.ecompid=?2 and t.pid=?1 and e.ecompid=t.cid and t.cview=true and t.eview=true and e.eid not in " +
             "(select t.eid from PrjParticipationCompInfo t where t.cid=?2 and t.pid=?1) group by e.eid order by e.ename")
-    List<IPrjParticipationEmpGetData> findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(Long pid, Long cid);
+    List<IPrjParticipationEmpGetData> findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(Long pid, Long cid, PageRequest of);
 
 
     @Modifying // Not supported for DML operations 에러 발생 시 해결 방법
@@ -64,5 +64,5 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     Optional<EmpInfo> findByEnameAndEphoneAndEcompid(String ename, String ephone, Long searchCompid);
 
     @Query(value = "select count(e) from EmpInfo e where e.ecompid=?1")
-    Long defaultEmpListCount(Long searchCompid);
+    Long defaultEmpListCount(Long Cid);
 }

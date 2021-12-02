@@ -2,6 +2,7 @@ package jcpmv2.jkcho.Controller.Employee;
 
 import jcpmv2.jkcho.Dto.Emp.*;
 import jcpmv2.jkcho.Dto.ListDto;
+import jcpmv2.jkcho.Error.Model.*;
 import jcpmv2.jkcho.Service.Employee.EmpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,15 +31,18 @@ public class EmpController {
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping("/create")
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid EmpCidGotViewDataDto empCidGotViewDataDto) {
-        if(empCidGotViewDataDto.getEname().equals(" ") || empCidGotViewDataDto.getEname().equals("") ) {
-            return new ResponseEntity("공백 제거 후 ' '상태", HttpStatus.OK);
+        empCidGotViewDataDto.setEname(empCidGotViewDataDto.getEname().trim());
+        empCidGotViewDataDto.setEemail(empCidGotViewDataDto.getEemail().trim());
+        empCidGotViewDataDto.setEphone(empCidGotViewDataDto.getEphone().trim());
+        empCidGotViewDataDto.setEposition(empCidGotViewDataDto.getEposition().trim());
+        empCidGotViewDataDto.setEaffiliation(empCidGotViewDataDto.getEaffiliation().trim());
+        if(empCidGotViewDataDto.getEname().equals("")) {
+            throw new EnameNullException();
+        } else if(empCidGotViewDataDto.getEphone().equals("")) {
+            throw new EphoneNullException();
         }
         empService.create(empCidGotViewDataDto);
-        if(empCidGotViewDataDto.getEname().equals("중복된 사원입니다(이름과 이메일이 중복)")) {
-            return new ResponseEntity("중복된 사원입니다(이름과 이메일이 중복)", HttpStatus.OK);
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return ResponseEntity.ok().build();
     }
 
     /*--------------------------------------UPDATE--------------------------------------*/
@@ -49,6 +53,16 @@ public class EmpController {
 
     @PutMapping()
     public ResponseEntity<HttpStatus> update(@RequestBody @Valid EmpTableDataDto empTableDataDto) {
+        empTableDataDto.setEname(empTableDataDto.getEname().trim());
+        empTableDataDto.setEemail(empTableDataDto.getEemail().trim());
+        empTableDataDto.setEphone(empTableDataDto.getEphone().trim());
+        empTableDataDto.setEposition(empTableDataDto.getEposition().trim());
+        empTableDataDto.setEaffiliation(empTableDataDto.getEaffiliation().trim());
+        if(empTableDataDto.getEname().equals("")) {
+            throw new EnameNullException();
+        } else if(empTableDataDto.getEphone().equals("")) {
+            throw new EphoneNullException();
+        }
         empService.update(empTableDataDto);
         return ResponseEntity.ok().build();
     }

@@ -4,6 +4,7 @@ import jcpmv2.jkcho.Dto.*;
 import jcpmv2.jkcho.Dto.Comp.CompPrjParticiDataDto;
 import jcpmv2.jkcho.Dto.Emp.EmpTableDataDto;
 import jcpmv2.jkcho.Dto.Project.*;
+import jcpmv2.jkcho.Error.Model.*;
 import jcpmv2.jkcho.Service.Project.PrjService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,8 +66,10 @@ public class prjController {
     /*--------------------------------------CREATE--------------------------------------*/
     @PostMapping()
     public ResponseEntity<HttpStatus> create(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
-        if (prjTableDataDto.getPname().equals("") || prjTableDataDto.getPname().equals(" ")) {
-            throw new NullPointerException();
+        prjTableDataDto.setPname(prjTableDataDto.getPname().trim());
+        prjTableDataDto.setPcontent(prjTableDataDto.getPcontent().trim());
+        if (prjTableDataDto.getPname().equals("")) {
+            throw new PnameNullException();
         }
         prjService.create(prjTableDataDto);
         return ResponseEntity.ok().build();
@@ -86,8 +89,10 @@ public class prjController {
 
     @PutMapping()
     public ResponseEntity<HttpStatus> updatePrjTry(@RequestBody @Valid PrjTableDataDto prjTableDataDto) {
-        if(prjTableDataDto.getPname().equals("") || prjTableDataDto.getPname().equals(" ")) {
-            throw new NullPointerException();
+        prjTableDataDto.setPname(prjTableDataDto.getPname().trim());
+        prjTableDataDto.setPcontent(prjTableDataDto.getPcontent().trim());
+        if(prjTableDataDto.getPname().equals("")) {
+            throw new PnameNullException();
         }
         prjService.updatePrjTry(prjTableDataDto);
         return ResponseEntity.ok().build();
