@@ -28,13 +28,14 @@ public class EmpService {
     @Autowired
     private IprjParticipationCompJpaRepository iprjParticipationCompJpaRepository;
 
-    public ListDto<EmpTableDataDto> findAllByEcompidOrderByEnamePaging(EmpListSearchDataDto empListSearchDataDto) { /*SearchingDto searchingDto*/
+    /*--------------------------------------SELECT--------------------------------------*/
+    public ListDto<EmpTableDataDto> findAllByEcompidOrderByEnamePaging(EmpListSearchDataDto empListSearchDataDto) { // 직원 전체 리스트 검색
         List<EmpInfo> EmpList = new ArrayList<>();
         List<IPrjParticipationEmpGetData> joinList = new ArrayList<>();
         Long empListCount = 0L;
         Long empListCountParticiRemove = 0L;
         Long result = 0L;
-        if (empListSearchDataDto.getParticipationEmpRemove().equals("true")) {
+        if (empListSearchDataDto.getParticipationEmpRemove().equals("true")) { // 프로젝트에 참가하고 있는 직원을 제외한 나머지 직원 전체 목록을 찾음
             joinList = iempJpaTryRepository.findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(empListSearchDataDto.getPid(), empListSearchDataDto.getCid(), PageRequest.of(0 + empListSearchDataDto.getPageNo(), 10));
             empListCount = iempJpaTryRepository.defaultEmpListCount(empListSearchDataDto.getCid());
             empListCountParticiRemove = iprjParticipationCompJpaRepository.empListCountParticiRemove(empListSearchDataDto.getPid(), empListSearchDataDto.getCid());
@@ -88,6 +89,7 @@ public class EmpService {
                 .build();
     }
 
+    /*--------------------------------------CREATE--------------------------------------*/
     @Transactional
     public void create(EmpCidGotViewDataDto empCidGotViewDataDto) {
         Optional<EmpInfo> duplicateCheck = iempJpaTryRepository.findByEnameAndEphoneAndEcompid(empCidGotViewDataDto.getEname(), empCidGotViewDataDto.getEphone(), empCidGotViewDataDto.getSearchCompid());
@@ -106,6 +108,7 @@ public class EmpService {
         }
     }
 
+    /*--------------------------------------UPDATE--------------------------------------*/
     @Transactional
     public ListDto<EmpTableDataDto> empUpdateReady(EmpTableDataDto empTableDataDto) {
         List<EmpInfo> EmpList = iempJpaTryRepository.findAllByEid(empTableDataDto.getEid());
@@ -130,6 +133,7 @@ public class EmpService {
         empInfo.setEaffiliation(empTableDataDto.getEaffiliation());
     }
 
+    /*--------------------------------------DELETE--------------------------------------*/
     @Transactional
     public void unrealDelete(Long eid) {
         iempJpaTryRepository.unrealDelete(eid);
@@ -139,4 +143,5 @@ public class EmpService {
     public void realDelete(Long eid) {
         iempJpaTryRepository.deleteByEid(eid);
     }
+
 }

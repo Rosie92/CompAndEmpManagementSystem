@@ -4,6 +4,10 @@
 <div layout:fragment="content">
     <template>
         <div>
+            <!--
+                회사 등록 페이지,
+                input으로 받아온 정보를 pageData.createComp에 담아 form으로 전달
+            -->
             <h1>회사 신규 등록</h1>
             <el-form ref="form" :model="pageData.createComp">
                 <el-form-item label="회사명">
@@ -21,8 +25,8 @@
             </el-form>
         </div>
         <div>
-            <el-button @click="create">저장</el-button>
-            <el-button @click="moveTable">회사목록</el-button>
+            <el-button @click="create">저장</el-button> <!--해당 버튼으로 create 함수로 연결-->
+            <el-button @click="moveTable">회사목록</el-button> <!--회사 목록으로 이동하는 메소드로 연결-->
         </div>
     </template>
 </div>
@@ -39,6 +43,7 @@
 
         let localData = {
             createComp: {
+                // 회사 등록 시 정보를 담는 그릇. 빈칸 유효성 체크를 위해 공백으로 초기값 지정
                 cname: "",
                 cboss: "",
                 ccall: "",
@@ -48,13 +53,18 @@
         };
 
         let localMethod = {
+            // 회사 등록 실행 메소드. 컨트롤러로 이동 시 등록할 회사 정보를 담은 createComp와 함께 이동
             create: function() {
                 axiosPost("/api/company/compController", vueApp.pageData.createComp,
                     function () {
                         alert("회사 등록 성공");
-                        location.href = "/view/Company/CompCreate";
+                        location.href = "/view/Company/CompCreate"; // 실행 성공 시 회사 등록 페이지를 다시 로드
                     },
                     function (error) {
+                        /*
+                            에러를 처리하는 메소드, 어떤 칸이 비어있는지 확인 후 화면에 알림.
+                            그 이외의 에러는 에러메시지를 출력
+                        */
                         if(error.response.data.errorMessages[0] == "error.cname.null") {
                             console.log(error.response);
                             alert("에러: 회사명이 입력되지 않았습니다.")
@@ -75,6 +85,7 @@
                 );
             },
             moveTable: function() {
+                // 회사 목록으로 이동
                 location.href = "/view/Company/CompTable";
             }
         }

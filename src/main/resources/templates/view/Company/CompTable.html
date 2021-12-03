@@ -5,11 +5,16 @@
 <div layout:fragment="content">
     <!-- ##########################################Comp######################################### -->
     <!-- -------------------- 회사 테이블 -------------------- -->
-    <div class="table-contents-wrap">
+    <div class="table-contents-wrap"> <!--pageData.listData에 담겨있는 회사 리스트를 화면에 출력-->
         <el-table :data="pageData.listData" style="width:100%">
             <el-table-column label="회사명" class-name="data-table-cell "
                              label-class-name="data-table-header " :min-width="310">
                 <template slot-scope="scope">
+                    <!--
+                        el-link에서는 scope를 이용해 해당 리스트의 회사명을 출력
+                        링크 클릭시 empList 메소드로 이동함과 동시에 해당 리스트의 cid(회사아이디) 정보를 함께 담아 이동
+                        해당 메소드 실행 후 #empTableOn의 아이디를 가진 모달창이 열림
+                    -->
                     <el-link @click="empList(scope.row.cid)" data-toggle="modal" data-target="#empTableOn">{{ scope.row.cname }}</el-link>
                 </template>
             </el-table-column>
@@ -31,12 +36,26 @@
                 </template>
             </el-table-column>
         </el-table>
+        <!--
+            회사 목록을 페이징하기 위한 데이터를 갖고있는 pData
+            페이징할 리스트들의 총 size를 갖는 listCount
+            페이징 번호 사이즈를 갖는 countPerPage
+            현재 페이지 번호를 갖는 pageNo
+            페이지 번호 클릭시 list 메소드로 이동하여 해당 페이지의 리스트를 다시 불러옴(pageNo정보 필요)
+        -->
         <el-pagination small layout="prev, pager, next" :total="pageData.pData.listCount"
                        :page-size="pageData.pData.countPerPage" :current-page.sync="pageData.pData.pageNo"
                        @current-change="list">
         </el-pagination>
     </div>
     <div>
+        <!--
+            특정 조건에 해당하는 회사들을 찾음
+            listConditionSearchData에 조건에 대한 정보들이 담김
+            listCondition은 검색 기준을 정하는 셀렉박스로 선택된 조건이 listConditionSearchData에 담김
+            item은 검색할 문자를 담는곳으로 input으로 받아와 listConditionSearchData에 담김
+            검색버튼(listPageNoRest)을 통해 조건 검색된 리스트가 다시 화면에 출력됨
+        -->
         <el-form ref="form" :model="pageData.listConditionSearchData">
             <el-form-item label="리스트 조건 검색">
                 <el-row type="flex">
@@ -44,14 +63,18 @@
                         <el-option v-for="item in pageData.listCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                     </el-select>
                     <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
+                    <!--
+                        조건 검색 실행 이전에 조건에 맞춰 검색된 테이블을 1페이지부터 보여주기 위하여 listPageNoReset으로 이동하여
+                        pageNo를 1로 변경한 후 조건 검색이 실행됨
+                    -->
                     <el-button @click="listPageNoReset">검색</el-button>
-                    <el-button @click="moveCreate">회사등록</el-button>
+                    <el-button @click="moveCreate">회사등록</el-button> <!--회사 등록 페이지로 이동-->
                 </el-row>
             </el-form-item>
         </el-form>
     </div>
     <!-- -------------------- 회사 업데이트 -------------------- -->
-    <div class="modal fade" id="compUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+    <div class="modal fade" id="compUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;"> <!--회사 업데이트를 위한 모달(팝업)창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -61,6 +84,15 @@
                     <div class="modal-body">
                         <div class="table-contents-wrap">
                             <div>
+                                <!--
+                                    업데이트 준비절차 > 해당 회사의 정보를 불러와 compUpdateData에 저장 후 기본 value값으로 표시
+                                    이 후 업데이트 시도 시, 입력된 데이터를 다시 compUpdateData에 저장하여
+                                    compUpdataStep2 메소드로 보냄
+                                    ...
+                                    입력값이 DB에서 지정된 해당 필드의 길이를 초과하려 발생하는 오류를 방지하기 위해
+                                    maxlength로 입력되는 값을 제한함
+                                    (C와 U의 모든 코드 공통사항)
+                                -->
                                 <el-form ref="form" :model="pageData.compUpdateData" style="margin-left: 20px;">
                                     <el-form-item label="회사명" style="display: inline-block;">
                                         <el-input v-model="pageData.compUpdateData.cname" style="width: 350px;" maxlength="15"></el-input><!-- onkeyup="checkSpacebar(this)"-->
@@ -92,7 +124,7 @@
 
     <!-- ###########################################Emp######################################### -->
     <!-- -------------------- 직원 테이블 -------------------- -->
-    <div class="modal fade" id="empTableOn" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="empTableOn" role="dialog" aria-hidden="true">  <!--회사에 등록된 직원 테이블을 보여주기위한 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -101,6 +133,10 @@
                     </div>
                     <div class="modal-body" id="empTableReload">
                         <div class="table-contents-wrap">
+                            <!--
+                                직원 테이블 모달창이 열리기 전에 직원 리스트를 찾는 메소드 실행
+                                해당 리스트를 empListData에 담아 테이블 출력
+                            -->
                             <el-table :data="pageData.empListData" style="width:100%">
                                 <el-table-column prop="cname" label="회사명" class-name="data-table-cell "
                                                  label-class-name="data-table-header" :min-width="200">
@@ -122,6 +158,10 @@
                                 </el-table-column>
                                 <el-table-column label="정보수정" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="140">
+                                    <!--
+                                        해당 직원의 UD를 수행하기 위하여 eid(직원아이디)가 필요하므로
+                                        UD 버튼을 클릭하여 메소드로 넘어갈 때 scope를 통해 클릭한 직원의(해당 리스트의) 아이디를 함께 가져감
+                                    -->
                                     <template slot-scope="scope">
                                         <el-link @click="empUpdateStep1(scope.row.eid)" data-toggle="modal" data-target="#empUpdate">[수정]</el-link>
                                         <el-link @click="empUnrealDelete(scope.row.eid)" data-toggle="modal">[가삭제]</el-link>
@@ -131,9 +171,11 @@
                             </el-table>
                             <el-button-group>
                                 <template slot-scope="scope">
+                                    <!--직원 생성을 위한 모달창 오픈-->
                                     <el-button :data="pageData.empListData" data-toggle="modal" data-target="#empCreate">직원생성</el-button>
                                 </template>
                             </el-button-group>
+                            <!--위에서 설명한 페이징 코드 설명과 동일-->
                             <el-pagination small layout="prev, pager, next" :total="pageData.empPData.empListCount"
                                            :page-size="pageData.empPData.countPerPage" :current-page.sync="pageData.empPData.pageNo"
                                            @current-change="empList">
@@ -141,6 +183,7 @@
                         </div>
                     </div>
                     <div>
+                        <!--위에서 설명한 조건 검색 설명과 동일-->
                         <el-form ref="form" :model="pageData.emplistConditionSearchData">
                             <el-form-item label="리스트 조건 검색">
                                 <el-row type="flex">
@@ -148,6 +191,7 @@
                                         <el-option v-for="item in pageData.emplistCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                                     </el-select>
                                     <el-input v-model="pageData.emplistConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
+                                    <!--위에서 설명한 조건 검색 이전에 pageNo를 초기화하는 설명과 동일-->
                                     <el-button @click="empListPageNoReset">검색</el-button>
                                 </el-row>
                             </el-form-item>
@@ -155,6 +199,7 @@
 
                     </div>
                     <div class="modal-footer">
+                        <!--직원 목록 닫기 버튼 클릭 시, 정보를 초기화해주기 위해 idAnditemClean 메소드로 이동하여 실행 후 팝업 종료-->
                         <button @click="idAnditemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
                     </div>
                 </div>
@@ -162,7 +207,7 @@
         </div>
     </div>
     <!-- -------------------- 직원 생성 -------------------- -->
-    <div class="modal fade" id="empCreate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+    <div class="modal fade" id="empCreate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;"> <!--직원 생성을 위한 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -173,6 +218,7 @@
                         <div class="table-contents-wrap">
                             <template>
                                 <div>
+                                    <!--직원 생성을 위해 input으로 입력된 정보를 createEmpInfo에 담아서 form 전송-->
                                     <el-form ref="form" :model="pageData.createEmpInfo" style="margin-left: 20px;">
                                         <el-form-item label="이름" style="display: inline-block;">
                                             <el-input v-model="pageData.createEmpInfo.ename" style="width: 350px;" maxlength="10"></el-input>  <!--onkeyup="checkSpacebar(this)"-->
@@ -192,12 +238,13 @@
                                     </el-form>
                                 </div>
                                 <div>
-                                    <el-button @click="createEmp" style="margin-left: 20px;">저장</el-button>
+                                    <el-button @click="createEmp" style="margin-left: 20px;">저장</el-button> <!--입력 정보를 갖고 메소드로 이동&실행-->
                                 </div>
                             </template>
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <!--직원 생성 종료 시 이전에 입력 받았던 데이터들을 초기화하기 위해 itemClean 메소드로 이동 후 실행 & 모달창 종료-->
                         <button @click="itemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button>
                     </div>
                 </div>
@@ -205,7 +252,7 @@
         </div>
     </div>
     <!-- -------------------- 직원 업데이트 -------------------- -->
-    <div class="modal fade" id="empUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;">
+    <div class="modal fade" id="empUpdate" role="dialog" aria-hidden="true" style="width:420px;margin:auto;"> <!--직원 업데이트를 위한 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -215,6 +262,10 @@
                     <div class="modal-body">
                         <div class="table-contents-wrap">
                             <div>
+                                <!--
+                                    직원 업데이트 실행 전 해당 직원의 정보를 empUpdateData에 받아와 기본 value값으로 보여줌
+                                    이 후 수정된 정보를 empUpdateData에 담아 업데이트를 진행
+                                -->
                                 <el-form ref="form" :model="pageData.empUpdateData" style="margin-left: 20px;">
                                     <el-form-item label="이름" style="display: inline-block;">
                                         <el-input v-model="pageData.empUpdateData.ename" style="width: 350px;" maxlength="10"></el-input> <!--onkeyup="checkSpacebar(this)"-->
@@ -234,6 +285,7 @@
                                 </el-form>
                             </div>
                             <div>
+                                <!--업데이트를 위해 input에 담은 정보들을 갖고 empUpdateSept2 메소드로 이동-->
                                 <el-button @click="empUpdateStep2" style="margin-left: 20px;">저장</el-button>
                             </div>
                         </div>
@@ -259,29 +311,24 @@
         }*/
 
         let localData = {
+            // 등록된 회사들의 리스트
             listData: {},
+            // 회사에 등록된 직원들의 리스트
             empListData: [],
-            count: 0,
+            // 회사 목록 페이징을 위한 item
             pData: {
                 pageNo: 1,
                 countPerPage: 5
             },
+            // 직원 목록 페이징을 위한 item
             empPData: {
                 pageNo: 1,
                 countPerPage: 5
             },
             searchCompid: {
-                searchCompid: '',
-                pagingOff: "",
-                getParticipationEmpRemove: ""
+                searchCompid: '', // 직원 목록을 찾을 때, 어떤 회사의 직원을 찾을것인지의 기준이되는 회사id를 담는 item
             },
-            trainData: {},
-            etc : {
-                dateRange: '',
-            },
-            temp: {
-                cid:'',
-            },
+            // 직원 생성을 위해 직원 정보를 저장하기 위한 item
             createEmpInfo: {
                 ename: '',
                 eemail: '',
@@ -289,27 +336,33 @@
                 eposition: '',
                 eaffiliation: ''
             },
+            // 회사 업데이트를 위해 회사 정보를 저장히기 위한 item
             compUpdateData: {
                 cid: ''
             },
+            // 직원 정보 업데이트를 위해 직원 정보를 저장하기 위한 item
             empUpdateData: {
                 eemail:'',
                 eposition:'',
                 eaffiliation:''
             },
+            // 회사 조건 검색 시, 조건과 검색어를 저장하는 item
             listConditionSearchData: {
                 condition: 'cname+cboss',
                 item: ''
             },
+            // 직원 조건 검색 시, 조건과 검색어를 저장하는 item
             emplistConditionSearchData: {
                 condition: 'ename',
                 item: ''
             },
+            // 회사 조건 검색 시, 조건 셀렉 박스를 구성하는 item들
             listCondition: [
                 {conditionText: "회사명+대표명", conditionValue: "cname+cboss"},
                 {conditionText: "대표전화", conditionValue: "ccall"},
                 {conditionText: "법인번호", conditionValue: "cnumber"}
             ],
+            // 직원 조건 검색 시, 조건 셀렉 박스를 구성하는 item들
             emplistCondition: [
                 {conditionText: "이름", conditionValue: "ename"},
                 {conditionText: "이메일", conditionValue: "eemail"},
@@ -321,47 +374,65 @@
 
         let localMethod = {
             moveCreate: function() {
+                // 회사 등록 페이지로 이동
                 location.href = "/view/Company/CompCreate";
             },
             itemClean: function() {
+                /*
+                    직원 생성 종료 시
+                    다시 직원 생성 모달창을 열었을 때 input 공간을 빈칸으로 보여주기 위해
+                    (이전에 생성하려고 입력했던 값들이 그대로 남아있는 것을 방지하기 위해)
+                    정보를 초기화
+                */
                 this.pageData.createEmpInfo = {ename: '',eemail: '',ephone: '',eposition: '',eaffiliation: ''}
             },
             listPageNoReset: function() {
+                /*
+                    회사 조건 검색 실행 이전에 조건에 맞춰 검색된 테이블을 1페이지부터 보여주기 위하여 pageNo를 1로 변경하는 메소드
+                    변경 이후 조건 검색 시작
+                */
                 this.pageData.pData.pageNo = 1;
                 this.list();
             },
             empListPageNoReset: function() {
+                // listPageNoReset과 설명 동일(직원)
                 this.pageData.empPData.pageNo = 1;
                 this.empList();
             },
             // --------------------------------- COMP ---------------------------------
             list: function () {
-                if (this.pageData.listConditionSearchData.item == '') {
-                    // 전체 리스트 조회
+                if (this.pageData.listConditionSearchData.item == '') { // 조건 검색인지 아닌지 확인. 검색어(item)가 비어있으면 전체 리스트 검색
+                    // 회사 전체 리스트 조회
+                    /*
+                        서비스를 통해 DB에서 테이블을 가져올 때 페이지는 0부터 시작하므로 pageNo를 -1 하여 값을 전달해야함
+                        ex) 1페이지=0, 2페이지=1, 3페이지=2
+                     */
                     let pageNo = this.pageData.pData.pageNo - 1;
+                    // 전체 리스트의 페이징을 위해 pageNo를 URL에 담아 함께 전달
                     axiosGet("/api/company/compController/" + pageNo, null,
                         function (response) {
                             vueApp.pageData.listData = [];
+                            // 서비스에서 가져온 list 정보를 사용하기 위헤 pageData.listData에 담음
                             vueApp.pageData.listData = response.data.list;
+                            // 서비스에서 가져온 (페이징을 위한) 페이지 전체 count를 담음
                             vueApp.pageData.pData.listCount = response.data.listCount / 2;
                         },
                         function (error) {
+                            // 에러 핸들러에서 넘어온 에러메시지가 다음과 같다면 등록된 회사가 없는 것
                             if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
                                 console.log(error.response);
                                 alert("등록된 회사가 없습니다.")
                             } else {
+                            // 그 이외의 에러는 직접 메시지로 화면 출력
                                 console.log(error.response);
                                 alert("에러메시지 : " + error.response.data.errorMessages[0])
                             }
                         }
                     )
                 } else {
-                    // 조건 리스트 조회
-                    if(this.pageData.listConditionSearchData.condition == '') {
-                        alert("조건을 선택하세요.")
-                        return false;
-                    }
+                    // 회사 조건 리스트 조회
                     this.pageData.listConditionSearchData.pageNo = this.pageData.pData.pageNo - 1;
+                    // 컨트롤러로 이동시 listConditionSearchData(조건, 검색어, pageNo)를 담아 이동
                     axiosPost("/api/company/compController/listConditionSearch", vueApp.pageData.listConditionSearchData,
                         function (response) {
                             vueApp.pageData.listData = [];
@@ -381,8 +452,11 @@
                     )
                 }
             },
-            compUpdateStep1: function (cid) {
+            // 회사 업데이트 진행 전, 해당 회사의 정보들을 담아오기 위한 절차
+            compUpdateStep1: function (cid) { // (cid) : 화면에서 클릭한 회사의 cid를 받아옴
+                // 이후에 있을 업데이트 실행을 위해 어떤 회사를 업데이트 할것인지를 찾는 기준인 회사id를 미리 담아둠
                 vueApp.pageData.compUpdateData.cid = cid;
+                // 업데이트 실행 예정인 회사 정보를 찾기 위해 컨트롤러로 이동(cid와 함께)
                 axiosGet("/api/company/compController/updateReady/" + cid, null,
                     function (response) {
                         vueApp.pageData.compUpdateData = response.data.list[0];
@@ -393,18 +467,21 @@
                     }
                 )
             },
+            // 실제 회사 업데이트 진행
             compUpdateStep2: function () {
-                this.pageData.compUpdateData.cname = this.pageData.compUpdateData.cname.trim();
-                this.pageData.compUpdateData.cboss = this.pageData.compUpdateData.cboss.trim();
-                this.pageData.compUpdateData.ccall = this.pageData.compUpdateData.ccall.trim();
-                this.pageData.compUpdateData.cnumber = this.pageData.compUpdateData.cnumber.trim();
+                // 수정된(혹은 기존의) 정보들과 함께 컨트롤러로 이동
                 axiosPut("/api/company/compController", vueApp.pageData.compUpdateData,
                     function () {
                         alert("업데이트 성공");
+                        // 업데이트 성공 시 업데이트 모달창 종료(hide) 및 회사 리스트 새로고침
                         $('#compUpdate').modal('hide');
                         vueApp.list();
                     },
                     function (error) {
+                        /*
+                           업데이트를 위해 입려된 값들의 유효성을 체크
+                           에러 핸들러를 통해 발생한 에러의 메시지에 따라 화면에 메시지 출력
+                        */
                         if(error.response.data.errorMessages[0] == "error.cname.null") {
                             console.log(error.response);
                             alert("에러: 회사명이 입력되지 않았습니다.")
@@ -418,17 +495,20 @@
                             console.log(error.response);
                             alert("에러: 법인번호가 입력되지 않았습니다.")
                         } else {
-                            console.log(error.response);
+                        // 이외의 메시지는 화면에 직접적으로 표시시
+                           console.log(error.response);
                             alert("에러메시지 : " + error.response.data.errorMessages[0])
                         }
                     }
                 )
             },
-            compUnrealDelete: function (cid) {
-                if (confirm("가삭제를 진행하시겠습니까?") == true){
+            // 회사 가삭제 진행 메소드
+            compUnrealDelete: function (cid) { // (cid) : 화면에서 클릭한 회사의 id를 받아옴
+                if (confirm("가삭제를 진행하시겠습니까?") == true){ // 화면에서 확인 메시지 출력 (확인 & 취소 버튼 (true & false))
                     axiosPut("/api/company/compController/" + cid, null,
                         function () {
                             alert("가삭제가 완료되었습니다");
+                            // 삭제 완료 후 회사 테이블 새로고침
                             vueApp.list();
                         },
                         function (error) {
@@ -437,15 +517,18 @@
                         }
                     )
                 } else {
+                    // 확인 메시지 취소 선택 시 가삭제 버튼 선택 전으로 돌아감
                     return false;
                 }
 
             },
-            compRealDelete: function (cid) {
-                if (confirm("실삭제를 진행하시겠습니까?") == true) {
+            // 회사 실삭제 진행 메소드
+            compRealDelete: function (cid) { // 화면에서 클릭한 회사 id를 받아옴
+                if (confirm("실삭제를 진행하시겠습니까?") == true) { // 화면에서 확인 메시지 출력 (확인 & 취소 버튼 (true & false))
                     axiosDelete("/api/company/compController/" + cid, null,
                         function () {
                             alert("실삭제가 완료되었습니다");
+                            // 식삭제 완료 후 회사 테이블 새로고침
                             vueApp.list();
                         },
                         function (error) {
@@ -454,18 +537,19 @@
                         }
                     )
                 } else {
+                    // 확인 메시지 취소 선택 시 실삭제 선태 전으로 돌아감
                     return false;
                 }
             },
             // --------------------------------- EMP ----------------------------------
             empList: function(cid) {
-                // 전체 리스트 조회 (새로고침 포함)
+                // 직원 전체 리스트 조회
                 if (this.pageData.searchCompid.searchCompid == '') {
-                    this.pageData.searchCompid.searchCompid = cid; // 직원 생성 시 회사 구분을 위한 id
+                    this.pageData.searchCompid.searchCompid = cid; // 직원 검색 시 어떤 회사의 직원을 검색할지 구분을 위한 회사id
                 }
-                if(this.pageData.emplistConditionSearchData.item == '') {
+                if(this.pageData.emplistConditionSearchData.item == '') { // 전체 리스트와 조건 리스트를 구분, 검색어가 비어있으면 전체 리스트 조회
                     this.pageData.empListData = [];
-                    this.pageData.searchCompid.pageNo = this.pageData.empPData.pageNo -1;
+                    this.pageData.searchCompid.pageNo = this.pageData.empPData.pageNo -1; // 회사 리스트에서 기재한 설명과 동일
                     axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
                         function (response) {
                             vueApp.pageData.empListData = response.data.list;
@@ -483,16 +567,13 @@
                         }
                     )
                 } else {
-                    // 조건 리스트 조회
-                    if(this.pageData.emplistConditionSearchData.condition == '') {
-                        alert("조건을 선택하세요.")
-                        return false;
-                    }
+                    // 직원 조건 리스트 조회
+                    // 컨트롤러 이동 전에 검색 기준이 될 회사 아이디를 담아줌
                     this.pageData.emplistConditionSearchData.searchCompid = vueApp.pageData.searchCompid.searchCompid
                     this.pageData.emplistConditionSearchData.pageNo = this.pageData.empPData.pageNo -1;
                     axiosPost("/api/employee/empController/emplistConditionSearch", vueApp.pageData.emplistConditionSearchData,
                         function (response) {
-                            /*vueApp.pageData.empListData = [];*/
+                            vueApp.pageData.empListData = [];
                             vueApp.pageData.empListData = response.data.list;
                             vueApp.pageData.empPData.empListCount = response.data.empListCount / 2;
                             console.log("emplistConditionSearch실행완료")
@@ -511,23 +592,32 @@
                 }
             },
             idAnditemClean: function () {
+                /*
+                    직원 목록 닫기 실행 시,
+                    어떤 회사의 직원들을 찾아올지에 대한 기준이 된 회사id(searchCompid)를 초기화,
+                    다시 직원 목록을 실행하였을 때 조건 검색을 위한 입력창 공백 및 1페이지부터 노출시키기 위해
+                    해당 아이템들을 초기화
+                */
                 this.pageData.searchCompid.searchCompid = '';
                 this.pageData.emplistConditionSearchData.item = '';
                 this.pageData.empPData.pageNo = 1;
             },
+            // 직원 생성 메소드 실행
             createEmp: function() {
+                // 어떤 회사에 직원을 추가할 것인지의 기준이 될 회사id 담기
                 this.pageData.createEmpInfo.searchCompid = vueApp.pageData.searchCompid.searchCompid;
-                this.pageData.createEmpInfo.eview = true;
+                this.pageData.createEmpInfo.eview = true; // 직원 가삭제 여부를 판단할 item의 초기값 지정 (true==공개)
                 axiosPost("/api/employee/empController/create", vueApp.pageData.createEmpInfo,
                     function (response) {
                         alert("등록 성공");
                         // 다시 직원 생성을 눌렀을 때 input 값이 채워져 있는 것을 방지하기위해 데이터 비워주기
                         vueApp.pageData.createEmpInfo = {ename: '', eemail: '', ephone: '', eposition: '', eaffiliation: ''};
-                        $('#empCreate').modal('hide'); // 저장 완료되면 modal창 닫기
+                        $('#empCreate').modal('hide'); // 저장 완료되면 modal창 닫기(hide)
                         vueApp.empList() //직원 리스트 DB에서 다시 로드
-                        $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
+                        $('#empTableOn').modal('show') // 직원테이블(화면)새로고침(show)
                     },
                     function (error) {
+                    // 입력된 데이터들의 유효성 체크 (에러 핸들러 메시지를 통해 화면에 메시지 전달)
                         if(error.response.data.errorMessages[0] == "error.ename.null"){
                             console.log(error.response);
                             alert("에러: 직원명이 입력되지 않았습니다.(이름과 휴대폰 입력 필수)")
@@ -544,8 +634,9 @@
                     }
                 );
             },
-            empUpdateStep1: function (eid) {
-                this.pageData.empUpdateData.eid = eid;
+            // 직원 업데이트 전 해당 직원의 정보를 담아옴
+            empUpdateStep1: function (eid) { // 화면에서 클릭한 직원의 아이디를 가져옴
+                this.pageData.empUpdateData.eid = eid; // 업데이트 실행 시 사용할 직원id(eid)를 미리 담아둠
                 axiosGet("/api/employee/empController/updateStep/" + eid, null,
                     function (response) {
                         vueApp.pageData.empUpdateData = response.data.list[0];
@@ -556,17 +647,18 @@
                     }
                 )
             },
+            // 직원 업데이트 메소드 실행
             empUpdateStep2: function (){
-                console.log(vueApp.pageData.empUpdateData)
                 axiosPut("/api/employee/empController", vueApp.pageData.empUpdateData,
                     function (response) {
                         alert("업데이트 성공");
-                        vueApp.pageData.empUpdateData = {eemail: '', eposition: '', eaffiliation: ''};
-                        $('#empUpdate').modal('hide')
-                        vueApp.empList() //직원 리스트 DB에서 다시 로드
+                        vueApp.pageData.empUpdateData = {eemail: '', eposition: '', eaffiliation: ''}; // item 초기화
+                        $('#empUpdate').modal('hide') // 업데이트 모달창 종료
+                        vueApp.empList() //직원 리스트 새로고침
                         $('#empTableOn').modal('show') // 직원테이블(화면)새로고침
                     },
                     function (error) {
+                    // 업데이트를 위해 받아온 정보 유효성 체크
                         if(error.response.data.errorMessages[0] == "error.ename.null"){
                             console.log(error.response);
                             alert("에러: 직원명이 입력되지 않았습니다.(이름과 휴대폰 입력 필수)")
@@ -583,6 +675,7 @@
                     }
                 )
             },
+            // 직원 가삭제 메소드 실행
             empUnrealDelete: function (eid) {
                 if (confirm("가삭제를 진행하시겠습니까?") == true){
                     axiosPut("/api/employee/empController/" + eid, null,
@@ -601,6 +694,7 @@
                 }
 
             },
+            // 직원 실삭제 메소드 실행
             empRealDelete: function (eid) {
                 if (confirm("실삭제를 진행하시겠습니까?") == true) {
                     axiosDelete("/api/employee/empController/" + eid, null,
@@ -621,6 +715,7 @@
         }
 
         function vueMounted() {
+            // 회사 테이블 페이지 실행 시, 화면이 출력되기 전에 list 메소드(회사 목록)를 실행한 뒤 출력
             this.list();
         }
     </script>

@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 @AllArgsConstructor
 public class ListDto<T> {
+    // <T> 사용하는 메소드에서 지정한 제네릭 타입
     private Long listCount;
     private int listCount2;
     private Long empListCount;
