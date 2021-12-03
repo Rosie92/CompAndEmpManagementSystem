@@ -4,8 +4,10 @@ import jcpmv2.jkcho.Domain.EmpInfo;
 import jcpmv2.jkcho.Domain.IPrjParticipationEmpGetData;
 import jcpmv2.jkcho.Dto.Emp.*;
 import jcpmv2.jkcho.Dto.ListDto;
+import jcpmv2.jkcho.Error.Model.DuplicateException;
 import jcpmv2.jkcho.Mapper.QsolModelMapper;
 import jcpmv2.jkcho.Repository.IempJpaTryRepository;
+import jcpmv2.jkcho.Repository.IprjParticipationCompJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -23,44 +25,30 @@ public class EmpService {
     @Autowired
     private IempJpaTryRepository iempJpaTryRepository;
 
+    @Autowired
+    private IprjParticipationCompJpaRepository iprjParticipationCompJpaRepository;
+
     public ListDto<EmpTableDataDto> findAllByEcompidOrderByEnamePaging(EmpListSearchDataDto empListSearchDataDto) { /*SearchingDto searchingDto*/
         List<EmpInfo> EmpList = new ArrayList<>();
         List<IPrjParticipationEmpGetData> joinList = new ArrayList<>();
         Long empListCount = 0L;
-        if (empListSearchDataDto.getPagingOff().equals("off") && empListSearchDataDto.getParticipationEmpRemove().equals("true")) {
-            joinList = iempJpaTryRepository.findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(empListSearchDataDto.getPid(), empListSearchDataDto.getCid());
-        } else if (empListSearchDataDto.getPagingOff().equals("off")) {
-            EmpList = iempJpaTryRepository.findAllBySearchCompidOrderByEnamePagingOff(empListSearchDataDto.getSearchCompid());
+        Long empListCountParticiRemove = 0L;
+        Long result = 0L;
+        if (empListSearchDataDto.getParticipationEmpRemove().equals("true")) {
+            joinList = iempJpaTryRepository.findAllByCidAndPidOrderByEnamePagingOffAndParticipationEmpRemove(empListSearchDataDto.getPid(), empListSearchDataDto.getCid(), PageRequest.of(0 + empListSearchDataDto.getPageNo(), 10));
+            empListCount = iempJpaTryRepository.defaultEmpListCount(empListSearchDataDto.getCid());
+            empListCountParticiRemove = iprjParticipationCompJpaRepository.empListCountParticiRemove(empListSearchDataDto.getPid(), empListSearchDataDto.getCid());
+            result = empListCount - empListCountParticiRemove;
         } else {
             EmpList = iempJpaTryRepository.findAllByEcompidOrderByEnamePaging(empListSearchDataDto.getSearchCompid(), PageRequest.of(0 + empListSearchDataDto.getPageNo(), 10));/*searchingDto*/
-            empListCount = iempJpaTryRepository.count();
-            /*int count = 0;     query where eview=true 로 대체
-            int q = 0;
-            while(q < EmpList.size()) {
-                if (count == 1) {
-                    q = 0;
-                    count = 0;
-                }
-                if (EmpList.get(q).getEview() == false) {
-                    EmpList.remove(q);
-                    if (q == 0) {
-                        count = 1;
-                    } else {
-                        q--;
-                    }
-                }
-                if(EmpList.size() != 1) {
-                    q++;
-                } else if(EmpList.size() == 1 && EmpList.get(q).getEview() == true) {
-                    q++;
-                }
-            }*/
+            empListCount = iempJpaTryRepository.defaultEmpListCount(empListSearchDataDto.getSearchCompid());
         }
-        if (empListSearchDataDto.getPagingOff().equals("off") && empListSearchDataDto.getParticipationEmpRemove().equals("true")) {
+        if (empListSearchDataDto.getParticipationEmpRemove().equals("true")) {
             List<EmpTableDataDto> EmpListData = QsolModelMapper.map(joinList, EmpTableDataDto.class);
             return ListDto.<EmpTableDataDto>builder()
                     .list(EmpListData)
                     .compid(EmpListData.get(0).getEcompid())
+                    .empListCount(result)
                     .build();
         } else {
             List<EmpTableDataDto> EmpListData = QsolModelMapper.map(EmpList, EmpTableDataDto.class);
@@ -79,19 +67,19 @@ public class EmpService {
         Long count = null;
         if (empConditionSearchDataDto.getCondition().equals("ename")) {
             EmpList = iempJpaTryRepository.findAllByEname(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEname(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEname(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eemail")) {
             EmpList = iempJpaTryRepository.findAllByEemail(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEemail(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEemail(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("ephone")) {
             EmpList = iempJpaTryRepository.findAllByEphone(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEphone(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEphone(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eposition")) {
             EmpList = iempJpaTryRepository.findAllByEposition(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEposition(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEposition(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         } else if (empConditionSearchDataDto.getCondition().equals("eaffiliation")) {
             EmpList = iempJpaTryRepository.findAllByEaffiliation(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid(), PageRequest.of(0 + empConditionSearchDataDto.getPageNo(), 10));
-            count = iempJpaTryRepository.conditionCountByEaffiliation(empConditionSearchDataDto.getItem());
+            count = iempJpaTryRepository.conditionCountByEaffiliation(empConditionSearchDataDto.getItem(), empConditionSearchDataDto.getSearchCompid());
         }
         List<EmpTableDataDto> EmpListData = QsolModelMapper.map(EmpList, EmpTableDataDto.class);
         return ListDto.<EmpTableDataDto>builder()
@@ -102,9 +90,9 @@ public class EmpService {
 
     @Transactional
     public void create(EmpCidGotViewDataDto empCidGotViewDataDto) {
-        Optional<EmpInfo> duplicateCname = iempJpaTryRepository.findByEnameAndEphone(empCidGotViewDataDto.getEname(), empCidGotViewDataDto.getEphone());
-        if (duplicateCname.isPresent()) {
-            empCidGotViewDataDto.setEname("중복된 사원입니다(이름과 이메일이 중복)");
+        Optional<EmpInfo> duplicateCheck = iempJpaTryRepository.findByEnameAndEphoneAndEcompid(empCidGotViewDataDto.getEname(), empCidGotViewDataDto.getEphone(), empCidGotViewDataDto.getSearchCompid());
+        if (duplicateCheck.isPresent()) {
+            throw new DuplicateException();
         } else {
             EmpInfo empInfo = new EmpInfo();
             empInfo.setEname(empCidGotViewDataDto.getEname());
@@ -129,6 +117,10 @@ public class EmpService {
 
     @Transactional
     public void update(EmpTableDataDto empTableDataDto) {
+        Optional<EmpInfo> duplicateCheck = iempJpaTryRepository.findByEnameAndEphoneAndEcompid(empTableDataDto.getEname(), empTableDataDto.getEphone(), empTableDataDto.getEcompid());
+        if (duplicateCheck.isPresent()) {
+            throw new DuplicateException();
+        }
         // Dirty Checking; nas file 참조
         EmpInfo empInfo = iempJpaTryRepository.findById(empTableDataDto.getEid()).orElse(null);
         empInfo.setEname(empTableDataDto.getEname());

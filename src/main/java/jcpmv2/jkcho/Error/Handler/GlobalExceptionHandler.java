@@ -1,7 +1,10 @@
-package jcpmv2.jkcho.Error;
+package jcpmv2.jkcho.Error.Handler;
 
 import jcpmv2.jkcho.Dto.ErrorInfoDto;
+import jcpmv2.jkcho.Error.Model.QsolRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,9 @@ import java.util.Locale;
 @RestController // @Controller와 @ResponseBody 를 합친 어노테이션
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @Autowired
+    private MessageSource messageSource;
 
     @ResponseBody
     /*
@@ -51,4 +57,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
                 body(new ErrorInfoDto(999, "Error Occurs", errorMessages));
     }
+
+    /*@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)*/
+    @ResponseBody
+    @ExceptionHandler(QsolRuntimeException.class)
+    public ResponseEntity<ErrorInfoDto> ItemNullException (final QsolRuntimeException e) {
+        System.out.println("compCreateItemNull");
+        /*final ErrorInfoDto errorInfo = new ErrorInfoDto();
+        errorInfo.setErrorCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorInfo.setErrorMessage(messageSource.getMessage(e.getMessage(), null, locale));
+        return errorInfo;*/
+        log.error("--- CnameNullExeption handler --- {}", e.getLocalizedMessage());
+        List<String> errorMessage = new ArrayList<>();
+        errorMessage.add(e.getLocalizedMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+                body(new ErrorInfoDto(998, "compCreateItemNull", errorMessage));
+    }
+
 }

@@ -1,10 +1,12 @@
 package jcpmv2.jkcho.Repository;
 
+import jcpmv2.jkcho.Domain.IPrjInCompCountListData;
 import jcpmv2.jkcho.Domain.PrjParticipationCompInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IprjParticipationCompJpaRepository extends JpaRepository<PrjParticipationCompInfo, Long> {
@@ -30,8 +32,15 @@ public interface IprjParticipationCompJpaRepository extends JpaRepository<PrjPar
     @Query(value = "delete from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2 and t.eid=?3")
     void deleteByEid(Long pid, Long cid, Long eid);
 
-    @Query(value = "select count(t) from PrjParticipationCompInfo t where t.pid=?1 and t.cview=true")
-    Long getCountData(Long pid);
+
+   /* Long getCountData(Long pid);*/
+
     @Query(value = "select count(t) from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2 and t.eview=true")
     Long getEmpCountData(Long pid, Long cid);
+
+    @Query(value = "select count(t.cid) from PrjParticipationCompInfo t where t.pid=?1 and t.cview=true group by t.cid")
+    List<IPrjInCompCountListData> getCountData(Long pid);
+
+    @Query(value = "select count(t.eid) from PrjParticipationCompInfo t where t.pid=?1 and t.cid=?2")
+    Long empListCountParticiRemove(Long pid, Long cid);
 }

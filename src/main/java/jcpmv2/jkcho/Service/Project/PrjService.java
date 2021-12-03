@@ -82,14 +82,15 @@ public class PrjService {
 
     public ListDto<CompPrjParticiDataDto> findParticipationComp(PrjIdDataDto prjIdDataDto) {
         List<IPrjParticipationCompGetName> prjCompList = icompJpaTryRepository.findParticipationComp(prjIdDataDto.getPid(), PageRequest.of(0 + prjIdDataDto.getPageNo(), 10));
-        Long listCount = iprjParticipationCompJpaRepository.getCountData(prjIdDataDto.getPid());
+        List<IPrjInCompCountListData> count = iprjParticipationCompJpaRepository.getCountData(prjIdDataDto.getPid());
+        int listCount2 = count.size();
         if (prjCompList.size() == 0) {
             return null;
         } else {
             List<CompPrjParticiDataDto> prjListData = QsolModelMapper.map(prjCompList, CompPrjParticiDataDto.class);
             return ListDto.<CompPrjParticiDataDto>builder()
                     .list(prjListData)
-                    .listCount(listCount)
+                    .listCount2(listCount2)
                     /*.compid(PrjListData.get(0).getEcompid())*/
                     .build();
         }
