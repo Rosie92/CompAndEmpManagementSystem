@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
-    @ExceptionHandler(NullPointerException.class)
+    @ExceptionHandler(NullPointerException.class) // NullPointerException 발생 시 캐치하여 실행되는 메소드
     public ResponseEntity<ErrorInfoDto> NullPointerException(final NullPointerException e) {
         log.error("--- NullPointerException handler --- {}", e.getLocalizedMessage());
         List<String> errorMessages = new ArrayList<>();
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
 
     /*@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)*/
     @ResponseBody
-    @ExceptionHandler(QsolRuntimeException.class)
+    @ExceptionHandler(QsolRuntimeException.class) // 만들어진 오류 클래스로부터 QsolRuntimeException을 거쳐 이곳으로 오게됨
     public ResponseEntity<ErrorInfoDto> ItemNullException (final QsolRuntimeException e) {
         System.out.println("compCreateItemNull");
         /*final ErrorInfoDto errorInfo = new ErrorInfoDto();

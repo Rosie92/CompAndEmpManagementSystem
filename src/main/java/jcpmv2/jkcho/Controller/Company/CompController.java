@@ -13,6 +13,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/company/compController")
 public class CompController {
+
     @Autowired
     private CompService compService;
 

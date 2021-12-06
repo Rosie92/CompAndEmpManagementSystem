@@ -1,8 +1,6 @@
-package jcpmv2.jkcho.Domain;
+package jcpmv2.jkcho.Interface;
 
 public interface IPrjParticipationCompGetName {
-
-    String getCname();
     /*
         CompInfo, PrjInfo, PrjParticipationCompInfo
         세 개의 도메인을 조인하여
@@ -10,7 +8,8 @@ public interface IPrjParticipationCompGetName {
         IcompJpaTryRepository 에서 쿼리문을 이용, 데이터를 받아왔지만 이를 담는 과정에서
         Repository에서 CompInfo만 참조하고 있기에 오류가 발생
         이 정보들을 담아오기 위해 임시로 해당 interface를 활용
-     */
+    */
+    String getCname();
     String getCount();
     String getCid();
 }

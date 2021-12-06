@@ -550,6 +550,7 @@
                 if(this.pageData.emplistConditionSearchData.item == '') { // 전체 리스트와 조건 리스트를 구분, 검색어가 비어있으면 전체 리스트 조회
                     this.pageData.empListData = [];
                     this.pageData.searchCompid.pageNo = this.pageData.empPData.pageNo -1; // 회사 리스트에서 기재한 설명과 동일
+                    this.pageData.searchCompid.participationEmpRemove = "false"; // 서비스로 이동 시, 전체 리스트 조회 구분을 위한 값. 미지정시 전체 조회에서 NullPointerException
                     axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
                         function (response) {
                             vueApp.pageData.empListData = response.data.list;

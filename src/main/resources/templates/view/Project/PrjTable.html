@@ -5,9 +5,12 @@
 <div layout:fragment="content">
     <!-- -------------------- 프로젝트 테이블 -------------------- -->
     <div class="table-contents-wrap">
+        <!-- 등록된 프로젝트 목록을 표시(listData에 담겨있는 정보를 순서대로 테이블 표시)-->
         <el-table :data="pageData.listData" style="width:100%">
             <el-table-column label="프로젝트명" class-name="data-table-cell "
                              label-class-name="data-table-header " :min-width="310">
+                <!--scope를 통해 링크(pname)클릭 시 prjShow 메소드로 이동하며 해당 row의 pid(회사 아이디)를 함께 가져감
+                메소드 실행 후 prjShow 모달창 오픈-->
                 <template slot-scope="scope">
                     <el-link @click="prjShow(scope.row.pid)" data-toggle="modal" data-target="#prjShow">{{ scope.row.pname }}</el-link>
                 </template>
@@ -15,18 +18,35 @@
             <el-table-column label="정보수정" class-name="data-table-cell "
                              label-class-name="data-table-header " :min-width="190">
                 <template slot-scope="scope">
+                    <!--업데이트 모달창 표시 전, 해당 프로젝트의 정보를 불러오기 위해 프로젝트id(pid)를 갖고 updatePrjStep()로 이동 후 모달창 오픈-->
                     <el-link @click="updatePrjStep(scope.row.pid)" data-toggle="modal" data-target="#updatePrj">[수정]</el-link>
+                    <!--가삭제 수행을 위해 프로젝트 id(pid)를 갖고 prjUnrealDelete()로 이동-->
                     <el-link @click="prjUnrealDelete(scope.row.pid)" data-toggle="modal">[가삭제]</el-link>
+                    <!--실삭제 수행을 위해 프로젝트 id(pid)를 갖고 prjRealDelete()로 이동-->
                     <el-link @click="prjRealDelete(scope.row.pid)" data-toggle="modal">[실삭제]</el-link>
                 </template>
             </el-table-column>
         </el-table>
+        <!--
+            회사 목록을 페이징하기 위한 데이터를 갖고있는 pData
+            페이징할 리스트들의 총 size를 갖는 listCount
+            페이징 번호 사이즈를 갖는 countPerPage
+            현재 페이지 번호를 갖는 pageNo
+            페이지 번호 클릭시 list 메소드로 이동하여 해당 페이지의 리스트를 다시 불러옴(pageNo정보 필요)
+        -->
         <el-pagination small layout="prev, pager, next" :total="pageData.pData.listCount"
                        :page-size="pageData.pData.countPerPage" :current-page.sync="pageData.pData.pageNo"
-                       @current-change="list">
+                       @current-change="list"> <!--번호 변경 시, 해당 페이지 번호에 맞는 목록을 불러오기 위해 list() 재실행(새로고침 개념)-->
         </el-pagination>
     </div>
     <div>
+        <!--
+            특정 조건에 해당하는 회사들을 찾음
+            listConditionSearchData에 조건에 대한 정보들이 담김
+            listCondition은 검색 기준을 정하는 셀렉박스로 선택된 조건이 listConditionSearchData에 담김
+            item은 검색할 문자를 담는곳으로 input으로 받아와 listConditionSearchData에 담김
+            검색버튼(listPageNoRest)을 통해 조건 검색된 리스트가 다시 화면에 출력됨
+        -->
         <el-form ref="form" :model="pageData.listConditionSearchData">
             <el-form-item label="리스트 조건 검색">
                 <el-row type="flex">
@@ -34,6 +54,10 @@
                         <el-option v-for="item in pageData.listCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                     </el-select>
                     <el-input v-model="pageData.listConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
+                    <!--
+                        조건 검색 실행 이전에 조건에 맞춰 검색된 테이블을 1페이지부터 보여주기 위하여 projectListPageNoReset으로 이동하여
+                        pageNo를 1로 변경한 후 조건 검색(list()의 else 부분)이 실행됨
+                    -->
                     <el-button @click="projectListPageNoReset">검색</el-button>
                     <el-button @click="moveCreate">프로젝트등록</el-button>
                 </el-row>
@@ -42,6 +66,7 @@
     </div>
     <!-- -------------------- 프로젝트 상세 테이블 -------------------- -->
     <div class="modal fade" id="prjShow" role="dialog" aria-hidden="true">
+        <!--프로젝트 클릭 시 해당 프로젝트의 내용과 참여중인 회사를 보여주는 상세 테이블 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -55,6 +80,8 @@
                                     <tr>
                                         <th style="font-size: smaller">프로젝트 명</th>
                                         <tr>
+                                    <!--상세 테이블 모달창 오픈 이전에 실행된 메소드(prjShow())에서 불러온 해당 프로젝트의 내용이 담긴 prjShowData에서
+                                        정보를 출력해서 표시(prjShowData.pname | prjShowData.pcontent -->
                                             <th style="font-size: large">{{ pageData.prjShowData.pname }}</th>
                                         </tr>
                                     </tr>
@@ -66,9 +93,14 @@
                                     </tr>
                                 </colgroup>
                             </table>
+                            <!--프로젝트 목록에서 클릭한 프로젝트의 pname,pcontent를 가져오는 메소드(prjShow()) 실행 후 해당 메소드에서 연계로 실행된
+                            메소드(prjShowParticipationCompSearch())에서 해당 프로젝트에 참여중인 회사 정보를 Select, prjParticipationComp에 담겨있음-->
                             <el-table :data="pageData.prjParticipationComp" style="width:100%">
                                 <el-table-column label="프로젝트 참여 회사" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="400">
+                                    <!--회사 이름 클릭 시,
+                                    회사 아이디(cid)를 갖고 compEmpShow 메소드로 이동하여 회사에서 해당 프로젝트에 참여하고 있는 직원들의 목록을 검색함
+                                    완료 후 compEmpShow 모달창 오픈 후 목록 표시-->
                                     <template slot-scope="scope">
                                         <el-link @click="compEmpShow(scope.row.cid)" data-toggle="modal" data-target="#compEmpShow">{{ scope.row.cname }}</el-link>
                                     </template>
@@ -79,22 +111,25 @@
                                 <el-table-column label="정보수정" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="140">
                                     <template slot-scope="scope">
+                                        <!--해당 회사 아이디(cid)를 갖고 가삭제 메소드(prjCompUnrealDelete)로 이동-->
                                         <el-link @click="prjCompUnrealDelete(scope.row.cid)" data-toggle="modal">[가삭제]</el-link>
+                                        <!--해당 회사 아이디(cid)를 갖고 실삭제 메소드(prjCompRealDelete)로 이동-->
                                         <el-link @click="prjCompRealDelete(scope.row.cid)" data-toggle="modal">[실삭제]</el-link>
                                     </template>
                                 </el-table-column>
                             </el-table>
                             <el-pagination small layout="prev, pager, next" :total="pageData.prjInCompPData.listCount"
                                            :page-size="pageData.prjInCompPData.countPerPage" :current-page.sync="pageData.prjInCompPData.pageNo"
-                                           @current-change="prjShowParticipationCompSearch">
+                                           @current-change="prjShowParticipationCompSearch"> <!--페이지 목록 변경을 위한 새로고침-->
                             </el-pagination>
                         </div>
                     </div>
                     <div>
+                        <!--해당 프로젝트에 새로운 회사+직원을 추가하는 모달창을 열음-->
                         <el-button @click="compList">프로젝트 참여</el-button>
-                        <!--<el-link @click="prjShow(scope.row.pid)" data-toggle="modal" data-target="#prjShow">{{ scope.row.pname }}</el-link>-->
                     </div>
                     <div class="modal-footer">
+                        <!--다음에 열릴 상세 페이지의 페이징 번호를 1번부터 시작시키기 위해(pageNo 초기화) prJInCompPDataPageNoReset() 메소드 실행 후 모달창 클로즈-->
                         <button @click="prjInCompPDataPageNoReset" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button> <!--@click="idAnditemClean"-->
                     </div>
                 </div>
@@ -102,7 +137,7 @@
         </div>
     </div>
     <!-- -------------------- 프로젝트 참가를 위한 회사 테이블 목록 -------------------- -->
-    <div class="modal fade" id="compAddPrj" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="compAddPrj" role="dialog" aria-hidden="true"> <!--프로젝트에 신규 회사+직원 참가를 위한 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -111,9 +146,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="table-contents-wrap">
+                            <!--모달창 실행 전 단계(compList())에서전체 회사 목록을 찾아 compListData에 담은 뒤 표시-->
                             <el-table :data="pageData.compListData" style="width:100%">
                                 <el-table-column label="회사명" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="310">
+                                    <!--회사명 클릭 시 회사 아이디(cid)를 갖고 prjAddCompDeplicateCheck() 메소드로 이동하여
+                                    해당 회사가 현재 프로젝트에 이미 참여중인지 중복 체크 실행,
+                                    중복이 아니라면 prjAddCompEmpListSelect() 메소드로 이동-->
                                     <template slot-scope="scope">
                                         <el-link @click="prjAddCompDeplicateCheck(scope.row.cid)" data-toggle="modal">{{ scope.row.cname }}</el-link>
                                     </template>
@@ -130,7 +169,7 @@
                             </el-table>
                             <el-pagination small layout="prev, pager, next" :total="pageData.compPData.listCount"
                                            :page-size="pageData.compPData.countPerPage" :current-page.sync="pageData.compPData.pageNo"
-                                           @current-change="compList">
+                                           @current-change="compList"> <!--페이지 목록 변경을 위한 새로고침-->
                             </el-pagination>
                         </div>
                         <div>
@@ -141,6 +180,7 @@
                                             <el-option v-for="item in pageData.compListCondition" :key="item.conditionValue" :label="item.conditionText" :value="item.conditionValue"></el-option>
                                         </el-select>
                                         <el-input v-model="pageData.compListConditionSearchData.item" style="width: 500px;" maxlength="20"></el-input>
+                                        <!--검색 완료 후 1페이지부터 표시하기 위해 compPDataPageNoReset()을 먼저 수행 후 조건 검색 메소드(compList()의 else 부분)로 이동됨-->
                                         <el-button @click="compPDataPageNoReset">검색</el-button>
                                     </el-row>
                                 </el-form-item>
@@ -148,6 +188,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <!--해당 모달 창이 다시 열릴때를 대비하여 pageNo, 조건 검색을 위한 item 등을 초기화하기 위한 과정(itemClean()) 수행 후 모달창 클로즈-->
                         <button @click="itemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button> <!--@click="idAnditemClean"-->
                     </div>
                 </div>
@@ -155,7 +196,7 @@
         </div>
     </div>
     <!-- -------------------- 회사에서 프로젝트에 참가중인 직원 목록 -------------------- -->
-    <div class="modal fade" id="compEmpShow" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="compEmpShow" role="dialog" aria-hidden="true"> <!--해당 회사에서 현재 프로젝트에 참가중인 인원을 표시하는 목록창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -164,6 +205,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="table-contents-wrap">
+                            <!--모달창 표시 전에 compEmpShow()를 통해 회사에서 해당 프로젝트에 참여중인 직원 목록을 compEmpData에 저장해두었음-->
                             <el-table :data="pageData.compEmpData" style="width:100%">
                                 <el-table-column prop="ename" label="이름" class-name="data-table-cell "
                                                  label-class-name="data-table-header" :min-width="100">
@@ -183,7 +225,9 @@
                                 <el-table-column label="정보수정" class-name="data-table-cell "
                                                  label-class-name="data-table-header " :min-width="140">
                                     <template slot-scope="scope">
+                                        <!--scope를 통해 해당 직원의 아이디(eid)를 갖고 prjEmpUnrealDelete()로 이동하여 가삭제 수행-->
                                         <el-link @click="prjEmpUnrealDelete(scope.row.eid)" data-toggle="modal">[가삭제]</el-link>
+                                        <!--scope를 통해 해당 직원의 아이디(eid)를 갖고 prjEmpRealDelete()로 이동하여 실삭제 수행-->
                                         <el-link @click="prjEmpRealDelete(scope.row.eid)" data-toggle="modal">[실삭제]</el-link>
                                     </template>
                                 </el-table-column>
@@ -191,13 +235,18 @@
                             <el-pagination small layout="prev, pager, next" :total="pageData.empPData.listCount"
                                            :page-size="pageData.empPData.countPerPage" :current-page.sync="pageData.empPData.pageNo"
                                            @current-change="compEmpShowStep">
+                                <!--페이지 목록 변경을 위한 새로고침 시 compEmpShow()를 실행해야 함.
+                                compEmpShow()는 파라미터로 cid를 받아와야하는데, @current-change="compEmpShow"로 이동 시 cid를 지참할 수 없음
+                                따라서, compEmpShowStep()를 통해 compEmpShow()로 이동전 cid를 포함시켜줌-->
                             </el-pagination>
                         </div>
                     </div>
                     <div>
+                        <!--회사에서 해당 프로젝트에 참여중이지 않은 직원을 새로 참여시키기 위해 참여중이지 않은 직원들의 목록을 불러옴-->
                         <el-button @click="partiEmpAdd">참여 직원 추가</el-button>
                     </div>
                     <div class="modal-footer">
+                        <!--pageNo 초기화-->
                         <button @click="empPDataPageNoReset" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button> <!--@click="idAnditemClean"-->
                     </div>
                 </div>
@@ -206,6 +255,7 @@
     </div>
     <!-- -------------------- 프로젝트 참가를 위한 회사 직원 목록 및 참가할 직원 체크 테이블(신규추가) -------------------- -->
     <div class="modal fade" id="prjCompAddEmpCheck" role="dialog" aria-hidden="true">
+        <!--직원 목록에서 체크 박스로 체크한 직원들을 프로젝트 참여 인원으로 등록하는 모달창-->
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
                 <div class="modal-common">
@@ -215,7 +265,10 @@
                     <div class="modal-body">
                         <div class="table-contents-wrap">
                             <template style="height: 600px">
+                                <!--prjAddCompEmpListSelect()를 통해 해당 회사의 모든 직원들의 데이터를 담은 prjAddEmpListData-->
                                 <el-table :data="pageData.prjAddEmpListData" style="width:100%;" @selection-change="prjAddEmpNumberAdd">
+                                    <!--체크 박스 체킹 시, prjAddEmpNumberAdd() 메소드로 이동
+                                    체크된 모든 직원들을 등록하기 위한 변수에 해당 직원을 저장해둠-->
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column prop="ename" label="이름" class-name="data-table-cell "
                                                      label-class-name="data-table-header" :min-width="100">
@@ -235,16 +288,17 @@
                                 </el-table>
                                 <el-pagination small layout="prev, pager, next" :total="pageData.prjParticiCompEmpCheckPagingData.listCount"
                                                :page-size="pageData.prjParticiCompEmpCheckPagingData.countPerPage" :current-page.sync="pageData.prjParticiCompEmpCheckPagingData.pageNo"
-                                               @current-change="prjAddCompEmpListSelect">
+                                               @current-change="prjAddCompEmpListSelect"> <!--페이지 이동을 위한 새로고침-->
                                 </el-pagination>
                             </template>
                         </div>
                     </div>
                     <div>
+                        <!--테이블에서 체크된 모든 직원들을 프로젝트에 참여시키기 위해 prjAddCompEmpLastStep() 실행-->
                         <el-button @click="prjAddCompEmpLastStep">등록</el-button>
-                        <!--<el-link @click="prjShow(scope.row.pid)" data-toggle="modal" data-target="#prjShow">{{ scope.row.pname }}</el-link>-->
                     </div>
                     <div class="modal-footer">
+                        <!--해당 모달 창이 다시 열릴때를 대비하여 pageNo, 조건 검색을 위한 item 등을 초기화하기 위한 과정(itemClean()) 수행 후 모달창 클로즈-->
                         <button @click="itemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button> <!--@click="idAnditemClean"-->
                     </div>
                 </div>
@@ -252,6 +306,7 @@
         </div>
     </div>
     <!-- -------------------- 프로젝트 참가를 위한 회사 직원 목록 및 참가할 직원 체크 테이블2(기존에서추가) -------------------- -->
+    <!--참여중이지 않은 직원들을 찾아 목록으로 표시하며 체크 박스로 체크한 직원들을 프로젝트 참여 인원으로 등록하는 모달창-->
     <div class="modal fade" id="prjCompAddEmpCheck2" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal_div" role="document">
             <div class="modal-content">
@@ -262,7 +317,10 @@
                     <div class="modal-body">
                         <div class="table-contents-wrap">
                             <template style="height: 600px">
+                                <!--partiEmpAdd()를 통해 프로젝트에 참여중이지 않은 직원들의 데이터를 담은 prjAddEmpListData-->
                                 <el-table :data="pageData.prjAddEmpListData" style="width:100%;" @selection-change="prjAddEmpNumberAdd">
+                                    <!--체크 박스 체킹 시, prjAddEmpNumberAdd() 메소드로 이동
+                                    체크된 모든 직원들을 등록하기 위한 변수에 해당 직원을 저장해둠-->
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column prop="ename" label="이름" class-name="data-table-cell "
                                                      label-class-name="data-table-header" :min-width="100">
@@ -282,16 +340,17 @@
                                 </el-table>
                                 <el-pagination small layout="prev, pager, next" :total="pageData.prjParticiCompEmpCheckPagingData2.listCount"
                                                :page-size="pageData.prjParticiCompEmpCheckPagingData2.countPerPage" :current-page.sync="pageData.prjParticiCompEmpCheckPagingData2.pageNo"
-                                               @current-change="partiEmpAdd">
+                                               @current-change="partiEmpAdd"> <!--페이지 이동을 위한 새로고침-->
                                 </el-pagination>
                             </template>
                         </div>
                     </div>
                     <div>
+                        <!--테이블에서 체크된 모든 직원들을 프로젝트에 참여시키기 위해 prjAddCompEmpLastStep() 실행-->
                         <el-button @click="prjAddCompEmpLastStep">등록</el-button>
-                        <!--<el-link @click="prjShow(scope.row.pid)" data-toggle="modal" data-target="#prjShow">{{ scope.row.pname }}</el-link>-->
                     </div>
                     <div class="modal-footer">
+                        <!--해당 모달 창이 다시 열릴때를 대비하여 pageNo, 조건 검색을 위한 item 등을 초기화하기 위한 과정(itemClean()) 수행 후 모달창 클로즈-->
                         <button @click="itemClean" type="button" class="exit" data-dismiss="modal" aria-label="Close">닫기</button> <!--@click="idAnditemClean"-->
                     </div>
                 </div>
@@ -309,6 +368,7 @@
                     <div class="modal-body">
                         <div class="table-contents-wrap">
                             <div>
+                                <!--업데이트 수행 전, updatePrjStep() 을 통해 수정할 프로젝트의 정보를 미리 가져옴-->
                                 <el-form ref="form" :model="pageData.updateListData">
                                     <el-form-item label="프로젝트명">
                                         <el-input v-model="pageData.updateListData.pname" maxlength="15"></el-input><!-- onkeyup="checkSpacebar(this)"-->
@@ -320,6 +380,7 @@
                                 </el-form>
                             </div>
                             <div>
+                                <!--변경된 정보를 갖고 실제 업데이트를 수행할 메소드로 이동-->
                                 <el-button @click="updatePrjTry" style="margin-left: 20px;">저장</el-button>
                             </div>
                         </div>
@@ -344,69 +405,68 @@
         }*/
 
         let localData = {
-            listData: {},
-            updateListData: {},
-            prjAddEmpListData: {},
-            prjAddEmpListData2: {},
-            compListData: {},
-            compEmpData: {},
-            notPartiEmp: {},
-            dataDeliveryArea: {
+            listData: {}, // 등록된 프로젝트 목록
+            updateListData: {}, // 프로젝트 정보 수정을 위한 데이터를 저장할 item
+            prjAddEmpListData: {}, // 새로 프로젝트에 참가하는 회사의 직원의 정보를 담을 item
+            prjAddEmpListData2: {}, // 프로젝트에 참여하고 있는 회사에서 추가로 참여시킬 직원의 정보를 담을 item
+            compListData: {}, // 프로젝트에 참여하고 있는 회사 목록을 담는 item
+            compEmpData: {}, // 회사에서 해당 프로젝트에 참여하고 있는 직원 목록을 담는 item
+            dataDeliveryArea: { // 컨트롤러, 서비스로 보낼 정보들을 담는 곳
                 eid: []
             },
-            multipleSelection: [],
-            prjParticipationComp: {},
-            pData: {
+            multipleSelection: [], // 체크박스에서 체킹된 직원들을 저장할 item
+            prjParticipationComp: {}, // 프로젝트에 참여하고 있는 회사들의 정보를 담을 item
+            pData: { // 프로젝트 목록 페이징을 위한 item
                 pageNo: 1,
                 countPerPage: 5
             },
-            prjInCompPData: {
+            prjInCompPData: { // 프로젝트에 참여한 회사들의 페이징을 위한 item
                 pageNo: 1,
                 countPerPage: 5
             },
-            compPData: {
+            compPData: { // 프로젝트에 참여시킬 회사들의 페이징을 위한 item
                 pageNo: 1,
                 countPerPage: 5
             },
-            empPData: {
+            empPData: { // 직원 목록의 페이징을 위한 item
                 pageNo: 1,
                 countPerPage: 5
             },
-            prjParticiCompEmpCheckPagingData: {
+            prjParticiCompEmpCheckPagingData: { // 프로젝트 신규 추가 시, 직원들의 목록을 페이징할 item(체크박스)
                 pageNo: 1,
                 countPerPage: 5
             },
-            prjParticiCompEmpCheckPagingData2: {
+            prjParticiCompEmpCheckPagingData2: { // 기존 참여 회사의 추가 직원 참여 시, 직원들의 목록을 페이징할 item(체크박스)
                 pageNo: 1,
                 countPerPage: 5
             },
-            searchCompid: {
+            searchCompid: { // 회사 id를 전달하기 위한 item
                 searchCompid: ''
             },
-            listCondition: [
+            listCondition: [ // 프로젝트 조건 검색 시, 조건 목록
                 {conditionText: "프로젝트명", conditionValue: "pname"}
             ],
-            listConditionSearchData: {
+            listConditionSearchData: { // 프로젝트 조건 검색 시, 조건과 검색어를 담는 item
                 condition: 'pname',
                 item: ''
             },
-            compListCondition: [
+            compListCondition: [ // 회사 조건 검색 시, 조건 목록
                 {conditionText: "회사명+대표명", conditionValue: "cname+cboss"},
                 {conditionText: "대표전화", conditionValue: "ccall"},
                 {conditionText: "법인번호", conditionValue: "cnumber"}
             ],
-            compListConditionSearchData: {
+            compListConditionSearchData: { // 회사 조건 검색 시, 조건과 검색어를 담는 item
                 condition: 'cname+cboss',
                 item: ''
             },
-            prjShowData: []
+            prjShowData: [] // 프로젝트 명과 내용을 담는 item
         }
 
         let localMethod = {
-            moveCreate: function () {
+            moveCreate: function () { // 프로젝트 등록 페이지로 이동
                 location.href = "/view/Project/PrjCreate";
             },
-            itemClean: function () { // 회사 조건 검색 item
+            itemClean: function () { // 여러 설정을 초기화
                 this.pageData.compListConditionSearchData.item = '';
                 this.pageData.dataDeliveryArea.switch = "";
                 this.pageData.compPData.pageNo = 1;
@@ -427,9 +487,13 @@
                 this.pageData.compPData.pageNo = 1;
                 this.compList();
             },
-            list: function () { // 등록된 프로젝트 목록
-                if (this.pageData.listConditionSearchData.item == '') {
+            list: function () { // 프로젝트 목록 검색
+                if (this.pageData.listConditionSearchData.item == '') { // 검색어가 없을 시
                     // 전체 리스트 조회
+                    /*
+                        서비스를 통해 DB에서 테이블을 가져올 때 페이지는 0부터 시작하므로 pageNo를 -1 하여 값을 전달해야함
+                        ex) 1페이지=0, 2페이지=1, 3페이지=2
+                     */
                     let pageNo = this.pageData.pData.pageNo - 1;
                     axiosGet("/api/project/prjController/" + pageNo, null,
                         function (response) {
@@ -445,6 +509,7 @@
                 } else {
                     // 조건 리스트 조회
                     this.pageData.listConditionSearchData.pageNo = this.pageData.pData.pageNo - 1;
+                    // 조건 검색을 위해 조건과 검색어가 필요함(listConditionSearchData in condition(조건), item(검색어))
                     axiosPost("/api/project/prjController/listConditionSearch", vueApp.pageData.listConditionSearchData,
                         function (response) {
                             vueApp.pageData.listData = [];
@@ -453,27 +518,22 @@
                             console.log("listConditionSearch실행완료")
                         },
                         function (error) {
-                            if (error.response.data.errorMessages[0] == null) {
-                                console.log(error.response);
-                                alert("조건을 선택하세요.")
-                            } else {
-                                console.log(error.response);
-                                alert("에러메시지 : " + error.response.data.errorMessages[0])
-                            }
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
                         }
                     )
                 }
             },
-            prjShow: function(pid) { // 프로젝트 명, 프로젝트 내용 불러오기
-                this.pageData.dataDeliveryArea.pid = pid;
+            prjShow: function(pid) { // 프로젝트 상세 모달창 오픈 전, 프로젝트 명과 프로젝트 내용 불러오기
+                this.pageData.dataDeliveryArea.pid = pid; // 어떤 프로젝트의 정보를 가져올지의 구분을 위해 프로젝트id(pid)가 필요함
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
                 }
-                // 새로운 회사 프로젝트 참여 생성 AND 회사 등록 후 참여 회사 테이블을 새로고침하기 위해 필요한 데이터를 저장
                 axiosPost("/api/project/prjController/" + pid, null,
                     function (response) {
                         vueApp.pageData.prjShowData = response.data.list[0];
-                        vueApp.prjShowParticipationCompSearch()
+                        // 프로젝트 명과 프로젝트 내용 prjShowData에 저장 후 참여 회사들의 목록을 불러오기 위해 이동
+                        vueApp.prjShowParticipationCompSearch();
                     },
                     function (error) {
                         console.log(error.response);
@@ -490,12 +550,7 @@
                     function (response) {
                         vueApp.pageData.prjParticipationComp = response.data.list;
                         vueApp.pageData.prjInCompPData.listCount = response.data.listCount2 / 2;
-                        let i = 0;
-                        while(i < vueApp.pageData.prjParticipationComp.length) {
-                            vueApp.pageData.prjParticipationComp[i].count = vueApp.pageData.prjParticipationComp[i].count;
-                            i++;
-                        }
-                        $('#prjShow').modal('show')
+                        $('#prjShow').modal('show') // 완료 후 프로젝트 상세 모달창 오픈
                     },
                     function (error) {
                         console.log(error.response);
@@ -503,7 +558,7 @@
                     }
                 )
             },
-            compList: function () { // 프로젝트 상세에서 프로젝트 참여 버튼 클릭 시 나오는 회사 목록
+            compList: function () { // 프로젝트 상세에서 프로젝트 참여 버튼 클릭 시 실행
                 if (this.pageData.compListConditionSearchData.item == '') {
                     // 전체 리스트 조회
                     let pageNo = this.pageData.compPData.pageNo - 1;
@@ -512,9 +567,10 @@
                             vueApp.pageData.compListData = [];
                             vueApp.pageData.compListData = response.data.list;
                             vueApp.pageData.compPData.listCount = response.data.listCount / 2;
-                            $('#compAddPrj').modal('show')
+                            $('#compAddPrj').modal('show') // 완료 후 프로젝트 참여를 위한 회사 테이블 모달창 오픈
                         },
                         function (error) {
+                            // 회사 전체 목록을 검색했을 때, 아무것도 없다는 것.
                             if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
                                 console.log(error.response);
                                 alert("모든 회사가 참여중이거나, 참가할 수 있는 회사가 없습니다.")
@@ -532,38 +588,37 @@
                             vueApp.pageData.compListData = [];
                             vueApp.pageData.compListData = response.data.list;
                             vueApp.pageData.compPData.listCount = response.data.listCount / 2;
-                            $('#compAddPrj').modal('show')
+                            $('#compAddPrj').modal('show') // 조건 검색 완료 후 모달창 새로고침
                         },
                         function (error) {
-                            if(error.response.data.errorMessages[0] == null) {
-                                console.log(error.response);
-                                alert("조건을 선택하세요")
-                            } else {
-                                console.log(error.response);
-                                alert("에러메시지 : " + error.response.data.errorMessages[0])
-                            }
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
                         }
                     )
                 }
             },
             prjAddCompDeplicateCheck: function (cid) { // 프로젝트 참가 진행 중 회사 이름 클릭 시 중복 체크
-                this.pageData.dataDeliveryArea.cid = cid;
-                this.pageData.dataDeliveryArea.duplicateCheck = "중복체크확인";
+                this.pageData.dataDeliveryArea.cid = cid; // 어떤 회사를 기준으로할지 회사id(cid)가 필요함
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
                 }
                 if (confirm("해당 회사를 프로젝트에 참여시킵니다") == true){
                     axiosPost("/api/project/prjController/prjAddCompDeplicateCheck", vueApp.pageData.dataDeliveryArea,
-                        function (response) {
-                            if (response.data === "이미 참여한 회사입니다") {
-                                alert("이미 참여한 회사입니다");
-                            } else {
-                                vueApp.prjAddCompEmpListSelect();
-                            }
+                        function () {
+                            /*
+                                중복 체크 통과 시,
+                                참가와 동시에 어떤 직원들을 등록할지 정할 해당 회사 직원 목록 검색
+                            */
+                            vueApp.prjAddCompEmpListSelect();
                         },
                         function (error) {
-                            console.log(error.response);
-                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            if(error.response.data.errorMessages[0] == "error.duplicate"){
+                                console.log(error.response);
+                                alert("이미 참여한 회사입니다")
+                            } else {
+                                console.log(error.response);
+                                alert("에러메시지 : " + error.response.data.errorMessages[0])
+                            }
                         }
                     )
                 } else {
@@ -571,61 +626,71 @@
                 }
             },
             prjAddCompEmpListSelect: function() { // 회사 참여 중복 체크 이후 회사 등록과 동시에 프로젝트에 참여할 직원을 선택하기 위해 직원 목록 표시
-                this.pageData.searchCompid.searchCompid = this.pageData.dataDeliveryArea.cid;
+                this.pageData.searchCompid.searchCompid = this.pageData.dataDeliveryArea.cid; // 어떤 회사의 직원들을 불러올지 회사id(cid)가 필요함
                 this.pageData.prjAddEmpListData = [];
-                this.pageData.searchCompid.participationEmpRemove = "false";
+                this.pageData.searchCompid.participationEmpRemove = "false"; // 신규 회사 추가와, 기존 회사의 직원 추가를 구분하는 item. false는 신규추가
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
                 }
                 this.pageData.searchCompid.pageNo = this.pageData.prjParticiCompEmpCheckPagingData.pageNo - 1;
                 axiosPost("/api/employee/empController", vueApp.pageData.searchCompid,
-                function (response) {
-                    vueApp.pageData.prjAddEmpListData = response.data.list;
-                    vueApp.pageData.prjParticiCompEmpCheckPagingData.listCount = response.data.empListCount / 2;
-                    console.log(response.data)
-                    $('#prjCompAddEmpCheck').modal('show')
-                },
-                function (error) {
-                    if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
-                        console.log(error.response);
-                        alert("해당 회사에 등록된 직원이 없습니다. 직원 등록 후 다시 시도해주세요")
-                    } else {
-                        console.log(error.response);
-                        alert("에러메시지 : " + error.response.data.errorMessages[0])
+                    function (response) {
+                        vueApp.pageData.prjAddEmpListData = response.data.list;
+                        vueApp.pageData.prjParticiCompEmpCheckPagingData.listCount = response.data.empListCount / 2;
+                        console.log(response.data)
+                        $('#prjCompAddEmpCheck').modal('show') // 완료 후 직원 목록 모달창 오픈
+                    },
+                    function (error) {
+                        if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
+                            console.log(error.response);
+                            alert("해당 회사에 등록된 직원이 없습니다. 직원 등록 후 다시 시도해주세요")
+                        } else {
+                            console.log(error.response);
+                            alert("에러메시지 : " + error.response.data.errorMessages[0])
+                        }
                     }
-                }
                 )
             },
-            prjAddEmpNumberAdd: function(val) { // 체크된 직원의 목록
+            prjAddEmpNumberAdd: function(val) { // 직원 참가를 위해서, 체크된 직원들을 저장해둘 item
                 this.pageData.multipleSelection = val;
             },
             prjAddCompEmpLastStep: function () { // 프로젝트 참가에서 선택된 회사와 체크된 직원들을 DB에 등록하는 마지막 과정
-                let count = 0;
-                this.pageData.dataDeliveryArea.eid = [];
+                this.pageData.dataDeliveryArea.eid = []; // 체크된 여러 직원들을 저장하기 위해 eid를 배열로 변경
+                let count = 0; // eid를 옮길 때, 반복문 수행을 위한 변수
+                // 체크된 직원들의 eid를 컨트롤러를 통해 전달할 변수로 옮김
                 while(count < this.pageData.multipleSelection.length) {
                     this.pageData.dataDeliveryArea.eid[count] = this.pageData.multipleSelection[count].eid;
                     count++;
                 }
-                this.pageData.dataDeliveryArea.cview = true;
-                this.pageData.dataDeliveryArea.eview = true;
+                this.pageData.dataDeliveryArea.cview = true; // 가삭제 되어있지 않아야 함
+                this.pageData.dataDeliveryArea.eview = true; // 가삭제 되어있지 않아야 함
                 axiosPost("/api/project/prjController/prjAddCompEmpLastStep", vueApp.pageData.dataDeliveryArea,
                     function () {
-                        if(vueApp.pageData.dataDeliveryArea.eid.length == 0) {
+                        if(vueApp.pageData.dataDeliveryArea.eid.length == 0) { // 체크된 직원이 하나도 없다면 return false 시킴
                             alert("참여할 직원을 선택해주세요")
                             return false;
                         } else {
+                            /*
+                                switch : 직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item
+                                true인 상태가 "추가등록"
+                             */
                             if(vueApp.pageData.dataDeliveryArea.switch == "true") {
-                                // switch : 직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item
                                 alert("참여가 완료되었습니다");
                                 vueApp.pageData.prjParticiCompEmpCheckPagingData2.pageNo = 1;
-                                vueApp.prjShow(vueApp.pageData.dataDeliveryArea.pid); // 직원 수(count)갱신을 위해 새로고침
+                                vueApp.prjShow(vueApp.pageData.dataDeliveryArea.pid); // 참여 직원 수(count)갱신을 위해 새로고침
                                 $('#prjShow').modal('show')
                                 vueApp.compEmpShow(vueApp.pageData.dataDeliveryArea.cid); // 추가된 직원 표시를 위해 새로고침
                                 $('#compEmpShow').modal('show')
+                                // 계속 직원을 추가할 수 있도록 직원 목록(체크박스)을 유지하되, 이전 수행으로 추가된 직원은 사라지도록 새로고침
                                 vueApp.partiEmpAdd();
                                 $('#prjCompAddEmpCheck2').modal('show')
                             } else {
                                 alert("참여가 완료되었습니다");
+                                /*
+                                   회사 신규 등록이 끝나면 더이상 회사 신규 추가가 아닌 해당 회사의 추가 직원 참여가 되므로
+                                   switch를 true로 변경, 신규 등록 관련된 모달창을 닫고 해당 회사의 직원 목록과 직원 추가 모달창들을 자동으로
+                                   오픈시키고 마치 현재 창에서 직원을 계속 추가하는 것처럼 보이게 만듦
+                                */
                                 vueApp.pageData.dataDeliveryArea.switch = "true";
                                 $('#compAddPrj').modal('hide') // hide
                                 $('#prjCompAddEmpCheck').modal('hide') // hide
@@ -645,7 +710,7 @@
                 )
             },
             compEmpShow: function(cid) { // 프로젝트 상세에서 클릭한 회사의 프로젝트 참여 직원 목록
-                this.pageData.dataDeliveryArea.cid = cid;
+                this.pageData.dataDeliveryArea.cid = cid; // 어떤 회사의 직원을 가져올 것인지 회사id(cid)가 필요함
                 this.pageData.dataDeliveryArea.pageNo = this.pageData.empPData.pageNo -1;
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
@@ -661,13 +726,19 @@
                     }
                 )
             },
-            compEmpShowStep: function () {
+            compEmpShowStep: function () { // compEmpShow()로 이동 시, cid를 지참해주기 위한 중간 절차
                 this.compEmpShow(this.pageData.dataDeliveryArea.cid);
             },
             partiEmpAdd: function () { // 프로젝트 참가중인 회사에서 새로운 직원을 프로젝트에 참가시키기 위해 현재 프로젝트에 참가중이지 않은 직원 목록을 표시
                 this.pageData.prjAddEmpListData = [];
+                // 신규 회사 추가와, 기존 회사의 직원 추가를 구분하는 item. true는 기촌 회사 참여 직원 추가
                 this.pageData.dataDeliveryArea.participationEmpRemove = "true";
-                this.pageData.dataDeliveryArea.switch = "true"; // 직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item, 해당 메소드가 아닌 이후 메소드에서 활용됨
+                /*
+                    직원 등록 절차 중 마지막 DB 저장 진행 시, 회사+직원 초기 등록과 직원 추가 등록을 구분하는 item
+                    해당 메소드가 아닌 이후 메소드에서 활용됨
+                    true는 이미 참여한 회사의 참여 직원 추가
+                 */
+                this.pageData.dataDeliveryArea.switch = "true";
                 this.pageData.dataDeliveryArea.eid = "";
                 this.pageData.dataDeliveryArea.pageNo = this.pageData.prjParticiCompEmpCheckPagingData2.pageNo - 1;
                 console.log(vueApp.pageData.dataDeliveryArea)
@@ -676,7 +747,7 @@
                         vueApp.pageData.dataDeliveryArea.participationEmpRemove = "";
                         vueApp.pageData.prjAddEmpListData = response.data.list;
                         vueApp.pageData.prjParticiCompEmpCheckPagingData2.listCount = response.data.empListCount / 2;
-                        $('#prjCompAddEmpCheck2').modal('show') // 직원테이블(화면)새로고침
+                        $('#prjCompAddEmpCheck2').modal('show') // 직원 추가 모달창 오픈
                     },
                     function (error) {
                         if (error.response.data.errorMessages[0] == "Index 0 out of bounds for length 0") {
@@ -689,10 +760,11 @@
                     }
                 )
             },
-            updatePrjStep: function (pid) {
-                axiosGet("/api/project/prjController/update/" + pid, null,
+            updatePrjStep: function (pid) { // 업데이트 진행 전, 해당 프로젝트의 정보를 불러옴
+                axiosGet("/api/project/prjController/update/" + pid, null, // 어떤 프로젝트의 정보를 불러올지 프로젝트id(pid)가 필요함
                     function (response) {
                         vueApp.pageData.updateListData = response.data.list[0];
+                        // 실제 업데이트 진행 시 어떤 프로젝트를 수정할 것인지 구분하는 프로젝트id(pid)를 미리 담아둠
                         vueApp.pageData.updateListData.pid = pid;
                     },
                     function (error) {
@@ -701,14 +773,15 @@
                     }
                 )
             },
-            updatePrjTry: function () {
-                axiosPut("/api/project/prjController", vueApp.pageData.updateListData,
+            updatePrjTry: function () { // 프로젝트 정보 업데이트 실시
+                axiosPut("/api/project/prjController", vueApp.pageData.updateListData, // 업데이트를 위해 입력받은 input 정보를 담아 이동
                     function () {
                         alert("프로젝트 수정이 완료되었습니다")
-                        $('#updatePrj').modal('hide')
-                        vueApp.list();
+                        $('#updatePrj').modal('hide') // 완료 시 업데이트를 위한 모달창 클로즈
+                        vueApp.list(); // 프로젝트 목록 다시 로드(새로고침)
                     },
                     function (error) {
+                        // 필수 입력 항목인 프로젝트 명을 입력하지 않았을 경우 발생하는 에러
                         if(error.response.data.errorMessages[0] == "error.pname.null") {
                             console.log(error.response);
                             alert("에러 : 프로젝트 명은 필수 입력 항목입니다.")
@@ -719,12 +792,12 @@
                     }
                 )
             },
-            prjUnrealDelete: function (pid) {
+            prjUnrealDelete: function (pid) { // 프로젝트 가삭제 실시
                 if (confirm("가삭제를 진행하시겠습니까?") == true){
-                    axiosPut("/api/project/prjController/" + pid, null,
+                    axiosPut("/api/project/prjController/" + pid, null, // 구분을 위한 프로젝트id(pid)가 필요함
                         function () {
                             alert("가삭제가 완료되었습니다");
-                            vueApp.list();
+                            vueApp.list(); // 완료 후 프로젝트 목록 재로드(새로고침)
                         },
                         function (error) {
                             console.log(error.response);
@@ -736,12 +809,12 @@
                 }
 
             },
-            prjRealDelete: function (pid) {
+            prjRealDelete: function (pid) { // 프로젝트 실삭제 실시
                 if (confirm("실삭제를 진행하시겠습니까?") == true) {
-                    axiosDelete("/api/project/prjController/" + pid, null,
+                    axiosDelete("/api/project/prjController/" + pid, null, // 구분을 위한 프로젝트id(pid)가 필요함
                         function () {
                             alert("실삭제가 완료되었습니다");
-                            vueApp.list();
+                            vueApp.list(); // 완료 후 프로젝트 목록 재로드(새로고침)
                         },
                         function (error) {
                             console.log(error.response);
@@ -752,7 +825,7 @@
                     return false;
                 }
             },
-            prjCompUnrealDelete: function (cid) {
+            prjCompUnrealDelete: function (cid) { // 프로젝트에서 해당 참여 회사를 가삭제
                 this.pageData.dataDeliveryArea.cid = cid;
                 if(this.pageData.dataDeliveryArea.eid == "") {
                     this.pageData.dataDeliveryArea.eid = [];
@@ -773,7 +846,7 @@
                 }
 
             },
-            prjCompRealDelete: function (cid) {
+            prjCompRealDelete: function (cid) { // 프로젝트에서 해당 참여 회사를 실삭제
                 this.pageData.dataDeliveryArea.cid = cid;
                 if (confirm("실삭제를 진행하시겠습니까?") == true) {
                     if(this.pageData.dataDeliveryArea.eid == "") {
@@ -793,7 +866,7 @@
                     return false;
                 }
             },
-            prjEmpUnrealDelete: function (eid) {
+            prjEmpUnrealDelete: function (eid) { // 프로젝트에 참여하고 있는 회사의 해당 직원을 가삭제
                 this.pageData.dataDeliveryArea.eid = eid;
                 if (confirm("가삭제를 진행하시겠습니까?") == true){
                     axiosPut("/api/project/prjController/prjEmpUnrealDelete", vueApp.pageData.dataDeliveryArea,
@@ -815,7 +888,7 @@
                 }
 
             },
-            prjEmpRealDelete: function (eid) {
+            prjEmpRealDelete: function (eid) {  // 프로젝트에 참여하고 있는 회사의 해당 직원을 실삭제
                 this.pageData.dataDeliveryArea.eid = eid;
                 if (confirm("실삭제를 진행하시겠습니까?") == true) {
                     axiosPost("/api/project/prjController/prjEmpRealDelete", vueApp.pageData.dataDeliveryArea,
@@ -839,6 +912,7 @@
         }
 
         function vueMounted() {
+            // 해당 페이지 로드 전, 프로젝트 목록을 미리 불러와서 저장하여 페이지가 로드되면 바로 프로젝트 목록 표시
             this.list();
         }
     </script>
