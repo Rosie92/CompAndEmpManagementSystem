@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<!--title,link, script등의 설정이 있는 defaultConfig 조각을 가져와서 사용함. 경로/경로/파일이름::설정된조각이름  -->
 <head th:replace="layouts/fragments/defaultConfig::configFragment">
 </head>
 
@@ -21,46 +22,24 @@
             <div class="contents-bg"></div>
 
             <el-header>
+                <!--헤더 defaultHeader 조각을 가져와서 사용함. 경로/경로/파일이름::설정된조각이름  -->
                 <div th:replace="layouts/fragments/defaultHeader::headerFragment"></div>
             </el-header>
             <el-container>
                 <el-aside width="60">
+                    <!--사이드 메뉴인 defaultAsideLeft 조각을 가져와서 사용함. 경로/경로/파일이름::설정된조각이름 -->
                     <div th:replace="layouts/fragments/defaultAsideLeft::asideLeftFragment"></div>
                 </el-aside>
                 <div class="container-wrap">
                     <div class="main-container">
                         <el-main>
+                            <!--추후 생성될 주 영역인 content부분이 들어올 위치-->
                             <div layout:fragment="content">
                             </div>
                         </el-main>
-<!--                        <template>
-                            <div class="registration-title">
-                                <el-dialog class="password-wrap" width="30%" :visible.sync="passwordDialogVisible" :close-on-click-modal=false center>
-                                    <h3>비밀번호<span>변경하기</span></h3>
-                                    <div>
-                                        <el-form ref="form" :model="passwordToUpdate" class="password-popup">
-                                            <el-form-item label="현재 비밀번호">
-                                                <el-input v-model="passwordToUpdate.currentPassword" show-password>
-                                                </el-input>
-                                            </el-form-item>
-                                            <el-form-item label="새 비밀번호 ">
-                                                <el-input v-model="passwordToUpdate.password" show-password></el-input>
-                                            </el-form-item>
-                                            <el-form-item label="새 비밀번호 확인">
-                                                <el-input v-model="passwordToUpdate.confirmPassword" show-password>
-                                                </el-input>
-                                            </el-form-item>
-                                        </el-form>
-                                    </div>
-                                    <div slot="footer" class="dialog-footer">
-                                        <el-button type="primary" @click="updatePassword()" class="save">변경</el-button>
-                                        <el-button @click="passwordDialogVisible=false" class="exit">닫기</el-button>
-                                    </div>
-                                </el-dialog>
-                            </div>
-                        </template>-->
                     </div>
                     <el-footer>
+                        <!--푸터 영역인 defaultFooter 조각을 가져와서 사용함. 경로/경로/파일이름::설정된조각이름 -->
                         <div th:replace="layouts/fragments/defaultFooter::footerFragment"></div>
                     </el-footer>
                 </div>
@@ -68,19 +47,6 @@
         </el-container>
     </div>
 </div>
-    <div class="modal fade" id="errorModal" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal_div" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 id="modalTitle"></h5>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="exit" onClick="closePopup();">닫기</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 <script>
     ELEMENT.locale(ELEMENT.lang.ko);
 
@@ -179,9 +145,12 @@
         template: "<div class='page-title'>{{ title }}</div>"
     })
 
-    let vueApp = new Vue({
+    // 화면html의 jsp영역에서 vueApp.pageData.임의변수 = ??? 형식으로 데이터를 사용할 수 있게 하는 초기 세팅
+    let vueApp = new Vue({ // new Vue << 에서의 Vue는 Vue.js에서 받아오는 것
         el: '#vueApp',
         data: {
+            // vueApp 안에 pageData를 만들고 해당 변수의 데이터를 localData로 지정해 화면 jsp에서 만들 수 있게함
+            // ex) let localData = {}
             pageData: localData,
             errorMessage: '',
             errorMessages: [],
@@ -196,6 +165,10 @@
         mounted: vueMounted
     });
 
+    /*
+        화면 jsp의 localMethod에서 사용하는 axios 동작에 관한 설정
+        연결되는url, 함께 넘겨줄 data, 성공시, 실패시
+    */
     function axiosGet(url, data, success, failure) {
         axios.get(url, data)
             .then(success)
@@ -220,6 +193,7 @@
             .catch(failure);
     }
 
+/*
 
     const leftMenuCell = document.querySelector("#collapseOne");
     const leftMenuModule = document.querySelector("#collapseTwo");
@@ -230,10 +204,11 @@
     const leftMenuModuleHeader = document.querySelector("#headingTwo button");
     const leftMenuPackHeader = document.querySelector("#headingThree button");
     const leftMenuSystemHeader = document.querySelector("#headingFour button");
+*/
 
     const locationURL = window.location.pathname;
     const menuURL = locationURL.split("/")
-    if (menuURL[2] === "cell") {
+    /*if (menuURL[2] === "cell") {
         leftMenuCell.classList.add("show");
         leftMenuModule.classList.remove("show");
         leftMenuPack.classList.remove("show");
@@ -273,7 +248,7 @@
         leftMenuModuleHeader.classList.add("collapsed");
         leftMenuPackHeader.classList.add("collapsed");
         leftMenuSystemHeader.classList.remove("collapsed");
-    }
+    }*/
 </script>
 <th:block layout:fragment="scriptAfterCreateVue"></th:block>
 </body>

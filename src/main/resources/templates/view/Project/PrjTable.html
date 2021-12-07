@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="layouts/defaultLayout">
+      layout:decorator="layouts/defaultLayout"><!--defaultLayout의 설정/화면을 받음-->
 <th:block layout:fragment="css"><style></style></th:block>
-<div layout:fragment="content">
+<div layout:fragment="content"><!--defaultLayout의 content 부분에 해당하게됨-->
     <!-- -------------------- 프로젝트 테이블 -------------------- -->
     <div class="table-contents-wrap">
         <!-- 등록된 프로젝트 목록을 표시(listData에 담겨있는 정보를 순서대로 테이블 표시)-->

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorator="layouts/defaultLayout">
+      layout:decorator="layouts/defaultLayout"><!--defaultLayout의 설정/화면을 받음-->
 <th:block layout:fragment="css"><style></style></th:block>
-<div layout:fragment="content">
+<div layout:fragment="content"><!--defaultLayout의 content 부분에 해당하게됨-->
     <!-- ##########################################Comp######################################### -->
     <!-- -------------------- 회사 테이블 -------------------- -->
     <div class="table-contents-wrap"> <!--pageData.listData에 담겨있는 회사 리스트를 화면에 출력-->
