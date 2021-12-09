@@ -127,8 +127,8 @@ public class EmpService {
             empInfo.setEview(empCidGotViewDataDto.getEview());
             iempJpaTryRepository.save(empInfo);
             /*
-            // 트랜잭션 테스트, 이전 단계에서 save 수행 완료되었지만 아래 코드에서 오류 발생으로 인해 트랜잭션
             System.out.println("1차 save 진행 완료");
+            // 트랜잭션 테스트, 이전 단계에서 save 수행 완료되었지만 아래 코드에서 오류 발생
             empInfo.setEname("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
             iempJpaTryRepository.save(empInfo);
             */
@@ -160,17 +160,32 @@ public class EmpService {
         empInfo.setEphone(empTableDataDto.getEphone());
         empInfo.setEposition(empTableDataDto.getEposition());
         empInfo.setEaffiliation(empTableDataDto.getEaffiliation());
+        /*
+        System.out.println("1차update종료");
+        // 트랜잭션 테스트, 이전 단계에서 update수행 완료되었지만 아래 코드에서 오류 발생
+        empInfo.setEname("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+        */
     }
 
     /*--------------------------------------DELETE--------------------------------------*/
     @Transactional
-    public void unrealDelete(Long eid) {
+    public void unrealDelete(Long eid) { // 직원 가삭제. D수행이 아닌 eid를 통해 eview 값을 U함
         iempJpaTryRepository.unrealDelete(eid);
-    } // 직원 가삭제. D수행이 아닌 eid를 통해 eview 값을 U함
+        /*
+        System.out.println("가삭제 완료");
+        // 트랜잭션 테스트, 가삭제 수행 완료 후 임의 오류 발생
+        throw new NullPointerException();
+        */
+    }
 
     @Transactional
-    public void realDelete(Long eid) {
+    public void realDelete(Long eid) { // 직원 실삭제. D수행
         iempJpaTryRepository.deleteByEid(eid);
-    } // 직원 실삭제. D수행
+        /*
+        System.out.println("실삭제 완료");
+        // 트랜잭션 테스트, 실삭제 수행 완료 후 임의 오류 발생
+        throw new NullPointerException();
+        */
+    }
 
 }

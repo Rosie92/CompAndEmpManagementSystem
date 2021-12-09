@@ -78,4 +78,7 @@ public interface IempJpaTryRepository extends JpaRepository<EmpInfo, Long> {
     // 해당 회사id를 갖는 모든 직원을 삭제 (회사 삭제 시 실행)
     void deleteByEcompid(Long cid);
 
+    /*--------------------------------------TEST--------------------------------------*/
+    @Query(value = "select e from EmpInfo e where e.eid=?1")
+    void transactionTest(Long eid);
 }
